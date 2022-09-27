@@ -1,0 +1,29 @@
+{
+  "name": "akeyless-extension-azdo",
+  "version": "1.0.0",
+  "description": "An Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LanceMcCarthy/akeyless-extension-azdo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/issues"
+  },
+  "homepage": "https://github.com/LanceMcCarthy/akeyless-extension-azdo#readme",
+  "dependencies": {
+    "akeyless": "^2.19.0",
+    "akeyless-cloud-id": "^2.0.0",
+    "azure-pipelines-task-lib": "^4.0.0-preview",
+    "prettier": "^2.7.1"
+  },
+  "devDependencies": {
+    "sync-request": "^6.1.0"
+  }
+}
