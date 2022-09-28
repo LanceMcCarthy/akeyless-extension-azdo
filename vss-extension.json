@@ -12,8 +12,7 @@
     ],
     "description": "An Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault.",
     "categories": [
-        "Azure Pipelines",
-        "Build and release"
+        "Azure Pipelines"
     ],
     "tags": [
         "release",
@@ -24,7 +23,21 @@
         "password",
         "token"
     ],
+    "content": {
+        "details": {
+            "path": "README.md"
+        },
+        "license": {
+            "path": "LICENSE.md"
+        }
+    },
     "links": {
+        "repository": {
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
+        },
+        "getstarted": {
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/README.md"
+        },
         "support": {
             "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/issues"
         }
@@ -33,8 +46,8 @@
         "default": "images/akeyless-unlock-icon.png"
     },
     "branding": {
-        "color": "#28a745",
-        "theme": "dark"
+        "color": "green",
+        "theme": "light"
     },
     "screenshots": [
         {
@@ -45,14 +58,6 @@
         "type": "git",
         "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
     },
-    "content": {
-        "details": {
-            "path": "README.md"
-        },
-        "license": {
-            "path": "LICENSE.md"
-        }
-    },
     "files": [
         {
             "path": "tasks"
@@ -60,6 +65,13 @@
         {
             "path": "images",
             "addressable": true
+        }
+    ],
+    "badges": [
+        {
+            "href": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml",
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml/badge.svg",
+            "description": "CI"
         }
     ],
     "contributions": [

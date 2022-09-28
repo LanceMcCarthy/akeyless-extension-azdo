@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
     "id": "7bffb625-395f-4739-be89-a4ac710eb12e",
-    "name": "akeyless-extension-azdo",
+    "name": "akeylessExtensionAzdo",
     "friendlyName": "AKeyless Secrets Extension for Azure DevOps",
     "description": "An Azure DevOps extension to safely retrieve secrets from your AKeyless vault and create Pipeline secret variables.",
     "helpMarkDown": "[Learn more about this task](https://github.com/LanceMcCarthy/akeyless-extension-azdo)",
