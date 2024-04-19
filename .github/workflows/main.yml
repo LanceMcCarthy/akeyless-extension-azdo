@@ -7,6 +7,9 @@ jobs:
   build-and-package:
     runs-on: windows-latest
     name: Build and Package
+    permissions:
+      packages: write
+      contents: write
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -33,3 +36,35 @@ jobs:
         name: lancelotsoftware.akeylessExtensionsAzdo
         path: "**/*.vsix"
         retention-days: 30
+
+    # ************************| GITHUB RELEASE |************************ #
+
+    - name: Generate version number with date and workflow Run Number
+      id: version-creator
+      run: |
+        $buildDay = Get-Date -Format "yyyy.Mdd"
+        $runNumber = "$env:GITHUB_RUN_NUMBER"
+        $ver = $buildDay + "." + $runNumber + ".0"
+        echo "APP_VERSION=$ver" >> "$env:GITHUB_ENV"
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "build.${{ steps.version-creator.outputs.APP_VERSION }}"
+        release_name: "Akeyless AzDO Extensions (build.${{ steps.version-creator.outputs.APP_VERSION }})"
+        draft: false
+        prerelease: true
+
+    - name: Uploading Release asset
+      id: upload-sideload-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: lancelotsoftware.akeylessExtensionsAzdo*.vsix
+        asset_name: lancelotsoftware.akeylessExtensionsAzdo
+        asset_content_type: application/zip
