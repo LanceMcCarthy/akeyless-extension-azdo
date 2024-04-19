@@ -1,0 +1,102 @@
+{
+    "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+    "id": "7bffb625-395f-4739-be89-a4ac710eb12e",
+    "name": "akeylessExtensionAzdo",
+    "friendlyName": "AKeyless Secrets Extension for Azure DevOps",
+    "description": "An Azure DevOps extension to safely retrieve secrets from your AKeyless vault and create Pipeline secret variables.",
+    "helpMarkDown": "[Learn more about this task](https://github.com/LanceMcCarthy/akeyless-extension-azdo)",
+    "category": "Utility",
+    "author": "Lance McCarthy",
+    "visibility": [
+        "Build",
+        "Release"
+    ],
+    "version": {
+        "Major": 0,
+        "Minor": 1,
+        "Patch": 0
+    },
+    "instanceNameFormat": "Akeyless Secrets",
+    "groups": [
+        {
+            "name": "general",
+            "displayName": "General Settings",
+            "isExpanded": true
+        },
+        {
+            "name": "advanced",
+            "displayName": "Advanced",
+            "isExpanded": false
+        },
+        {
+            "name": "validations",
+            "displayName": "Validations",
+            "isExpanded": true
+        }
+    ],
+    "inputs": [
+        {
+            "name": "accessid",
+            "type": "string",
+            "label": "Access ID",
+            "defaultValue": "",
+            "groupName": "general",
+            "required": true,
+            "helpMarkDown": "The access id of your auth method (ex: 'p-iwt13fd19ajd')."
+        },
+        {
+            "name": "staticsecrets",
+            "type": "string",
+            "label": "Static Secrets",
+            "defaultValue": "",
+            "groupName": "general",
+            "required": false,
+            "helpMarkDown": "Static secrets to fetch from AKeyless. This needs to be a dictionary, with the secret's path as the key and the desired output name as the value. Example: {\"/path/to/static/secret\":\"my_first_secret\", \"/path/to/another/secret\":\"my_second_secret\"}"
+        },
+        {
+            "name": "dynamicsecrets",
+            "type": "string",
+            "label": "Dynamic Secrets",
+            "defaultValue": "",
+            "groupName": "general",
+            "required": false,
+            "helpMarkDown": "Dynamic secrets to fetch from AKeyless. This needs to be a dictionary, with the secret's path as the key and the desired output name as the value. Example: {\"/path/to/dynamic/secret\":\"my_dynamic_secret\"}"
+        },
+        {
+            "name": "accessType",
+            "type": "pickList",
+            "label": "Access type for login",
+            "defaultValue": "JWT",
+            "required": false,
+            "helpMarkDown": "Access type for login (JWT is most common and is set by default). You can find it in the AKeyless UI under the auth method you want to use.",
+            "options": {
+                "JWT": "JWT",
+                "AWS_IAM": "AWS_IAM",
+                "GCP": "GCP"
+            }
+        },
+        {
+            "name": "apiUrl",
+            "type": "string",
+            "label": "API URL",
+            "defaultValue": "https://api.akeyless.io",
+            "groupName": "advanced",
+            "required": false,
+            "helpMarkDown": "The Akeyless API endpoint to login/fetch secrets from."
+        },
+        {
+            "name": "producerForAwsAccess",
+            "type": "string",
+            "label": "Producer for AWS Access",
+            "defaultValue": "",
+            "groupName": "advanced",
+            "required": false,
+            "helpMarkDown": "Path to an AWS dynamic producer. If provided, AWS credentials will be fetched from it and exported to the environment."
+        }
+    ],
+    "execution": {
+        "Node16": {
+            "target": "src/index.js"
+        }
+    }
+}

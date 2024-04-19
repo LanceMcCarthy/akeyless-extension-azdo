@@ -1,0 +1,35 @@
+name: 'Main'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-package:
+    runs-on: windows-latest
+    name: Build and Package
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: "Run scripts"
+      working-directory: '${{ github.workspace }}\task\akeylesstask'
+      run: |
+        npm run restore
+        npm run format
+        npm run lint
+        # npm run test # temporarily commented out until TODOs are handled
+      env:
+        NODE_OPTIONS: "--max_old_space_size=4096"
+
+    - name: "Install Extension SDK"
+      run: 
+        npm i -g tfx-cli
+        tfx extension create --manifest-globs ../vss-extension.json
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: lancelotsoftware.akeylessExtensionsAzdo
+        path: "**/*.vsix"
+        retention-days: 30
