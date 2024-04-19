@@ -1,0 +1,89 @@
+{
+    "manifestVersion": 1,
+    "id": "akeylessExtensionsAzdo",
+    "name": "AKeyless Extensions for Azure DevOps",
+    "version": "0.1.0",
+    "public": false,
+    "publisher": "lancelotsoftware",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "description": "An Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault.",
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "tags": [
+        "release",
+        "build",
+        "akeyless",
+        "secrets",
+        "variable",
+        "password",
+        "token"
+    ],
+    "content": {
+        "details": {
+            "path": "README.md"
+        },
+        "license": {
+            "path": "LICENSE.md"
+        }
+    },
+    "links": {
+        "repository": {
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
+        },
+        "getstarted": {
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/README.md"
+        },
+        "support": {
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/issues"
+        }
+    },
+    "icons": {
+        "default": "images/akeyless-unlock-icon.png"
+    },
+    "branding": {
+        "color": "green",
+        "theme": "light"
+    },
+    "screenshots": [
+        {
+            "path": "images/screenshot.png"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
+    },
+    "files": [
+        {
+            "path": "tasks"
+        },
+        {
+            "path": "images",
+            "addressable": true
+        }
+    ],
+    "badges": [
+        {
+            "href": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml",
+            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml/badge.svg",
+            "description": "CI"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "akeyless-extensions-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "tasks"
+            }
+        }
+    ]
+}
