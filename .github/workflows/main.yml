@@ -30,12 +30,12 @@ jobs:
     # tfx CLI docs https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md
     - name: "Create Azure DevOps Extension (VSIX)"
       working-directory: ${{github.workspace}}
-      run: tfx extension create --manifest-globs ./vss-extension.json --output-path "/output"
+      run: tfx extension create --manifest-globs ./vss-extension.json
 
     - uses: actions/upload-artifact@v4
       with:
         name: lancelotsoftware.akeylessExtensionsAzdo
-        path: "${{github.workspace}}/output/*.vsix"
+        path: "**/*.vsix"
         retention-days: 30
 
     # ************************| GITHUB RELEASE |************************ #
@@ -66,6 +66,6 @@ jobs:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
         upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: "${{github.workspace}}/output/*.vsix"
+        asset_path: "${{github.workspace}}/*.vsix"
         asset_name: lancelotsoftware.akeylessExtensionsAzdo.vsix
         asset_content_type: application/zip
