@@ -40,32 +40,32 @@ jobs:
 
     # ************************| GITHUB RELEASE |************************ #
 
-    - name: Generate version number with date and workflow Run Number
-      id: version-creator
-      run: |
-        $buildDay = Get-Date -Format "yyyy.Mdd"
-        $runNumber = "$env:GITHUB_RUN_NUMBER"
-        $ver = $buildDay + "." + $runNumber + ".0"
-        echo "APP_VERSION=$ver" >> "$env:GITHUB_ENV"
+    # - name: Generate version number with date and workflow Run Number
+    #   id: version-creator
+    #   run: |
+    #     $buildDay = Get-Date -Format "yyyy.Mdd"
+    #     $runNumber = "$env:GITHUB_RUN_NUMBER"
+    #     $ver = $buildDay + "." + $runNumber + ".0"
+    #     echo "APP_VERSION=$ver" >> "$env:GITHUB_ENV"
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        tag_name: "build.${{github.run_number}}"
-        release_name: "Akeyless AzDO Extensions (build.${{github.run_number}})"
-        draft: false
-        prerelease: true
+    # - name: Create GitHub Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    #   with:
+    #     tag_name: "build.${{github.run_number}}"
+    #     release_name: "Akeyless AzDO Extensions (build.${{github.run_number}})"
+    #     draft: false
+    #     prerelease: true
 
-    - name: Uploading Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: "${{github.workspace}}/*.vsix"
-        asset_name: lancelotsoftware.akeylessExtensionsAzdo.vsix
-        asset_content_type: application/zip
+    # - name: Uploading Release Asset
+    #   id: upload-release-asset
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    #   with:
+    #     upload_url: ${{steps.create_release.outputs.upload_url}}
+    #     asset_path: "${{github.workspace}}/*.vsix"
+    #     asset_name: lancelotsoftware.akeylessExtensionsAzdo.vsix
+    #     asset_content_type: application/zip
