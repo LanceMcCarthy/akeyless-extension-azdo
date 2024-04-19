@@ -27,14 +27,15 @@ jobs:
       env:
         NODE_OPTIONS: "--max_old_space_size=4096"
 
+    # tfx CLI docs https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md
     - name: "Create Azure DevOps Extension (VSIX)"
-      working-directory: ${{ github.workspace }}
-      run: tfx extension create --manifest-globs ./vss-extension.json
+      working-directory: ${{github.workspace}}
+      run: tfx extension create --manifest-globs ./vss-extension.json --output-path "/output"
 
     - uses: actions/upload-artifact@v4
       with:
         name: lancelotsoftware.akeylessExtensionsAzdo
-        path: "**/*.vsix"
+        path: "${{github.workspace}}/output/*.vsix"
         retention-days: 30
 
     # ************************| GITHUB RELEASE |************************ #
@@ -51,20 +52,20 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        tag_name: "build.${{ github.run_number }}"
-        release_name: "Akeyless AzDO Extensions (build.${{ github.run_number }})"
+        tag_name: "build.${{github.run_number}}"
+        release_name: "Akeyless AzDO Extensions (build.${{github.run_number}})"
         draft: false
         prerelease: true
 
     - name: Uploading Release Asset
-      id: upload-sideload-asset
+      id: upload-release-asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: "**/*.vsix"
+        upload_url: ${{steps.create_release.outputs.upload_url}}
+        asset_path: "${{github.workspace}}/output/*.vsix"
         asset_name: lancelotsoftware.akeylessExtensionsAzdo.vsix
         asset_content_type: application/zip
