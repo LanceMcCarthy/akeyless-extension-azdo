@@ -27,7 +27,7 @@ jobs:
       env:
         NODE_OPTIONS: "--max_old_space_size=4096"
 
-    - name: "Install Extension SDK"
+    - name: "Create Azure DevOps Extension (VSIX)"
       working-directory: ${{ github.workspace }}
       run: tfx extension create --manifest-globs ./vss-extension.json
 
@@ -53,12 +53,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "build-${{ steps.version-creator.outputs.APP_VERSION }}"
-        release_name: "Akeyless AzDO Extensions (build-${{ steps.version-creator.outputs.APP_VERSION }})"
+        tag_name: "build.${{ github.run_number }}"
+        release_name: "Akeyless AzDO Extensions (build.${{ github.run_number }})"
         draft: false
         prerelease: true
 
-    - name: Uploading Release asset
+    - name: Uploading Release Asset
       id: upload-sideload-asset
       uses: actions/upload-release-asset@v1
       env:
