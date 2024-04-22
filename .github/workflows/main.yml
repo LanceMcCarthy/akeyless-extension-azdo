@@ -16,21 +16,18 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: "Run scripts"
+    - name: "Run scripts and package extension"
       working-directory: '${{ github.workspace }}\tasks\akeylesstask'
       run: |
+        # prep code
         npm run restore
         npm run format
-        npm run lint
-        # npm run test # temporarily commented out until TODOs are handled
-        npm i -g tfx-cli
+        npm run lint 
+        npm run test
+        npm i -g tfx-cli    # tfx CLI docs https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md
+        npm run package     # Create VSIX
       env:
         NODE_OPTIONS: "--max_old_space_size=4096"
-
-    # tfx CLI docs https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md
-    - name: "Create Azure DevOps Extension (VSIX)"
-      working-directory: ${{github.workspace}}
-      run: tfx extension create --manifest-globs ./vss-extension.json
 
     - uses: actions/upload-artifact@v4
       with:

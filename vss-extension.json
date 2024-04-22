@@ -2,9 +2,9 @@
     "manifestVersion": 1,
     "id": "akeylessExtensionsAzdo",
     "name": "AKeyless Extensions for Azure DevOps",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "public": false,
-    "publisher": "lancelotsoftware",
+    "publisher": "LancelotSoftware",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"

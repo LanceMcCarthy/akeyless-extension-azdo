@@ -8,7 +8,9 @@
     "format": "prettier --write **/*.js",
     "lint": "eslint **/*.js",
     "test": "jest",
-    "precommit": "npm run format && npm run lint && npm run test"
+    "precommit": "npm run format && npm run lint && npm run test",
+    "package": "cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json",
+    "package-version-bump": "cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json  --rev-version"
   },
   "keywords": [
     "release",
@@ -23,7 +25,6 @@
   "license": "ISC",
   "dependencies": {
     "akeyless": "^3.6.3",
-    "akeyless-cloud-id": "^2.3.0",
     "azure-pipelines-task-lib": "^4.11.0"
   },
   "devDependencies": {
