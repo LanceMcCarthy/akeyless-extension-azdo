@@ -2,7 +2,7 @@ const tl = require('azure-pipelines-task-lib/task');
 const akeylessApi = require('./akeyless_api');
 const akeyless = require('akeyless');
 
-function getDynamicSecret(api, secretName, variableName, akeylessToken) {
+function getDynamicSecret(api, secretName, variableName, akeylessToken, exportSecretsToEnvironment, exportSecretsToOutputs) {
   return new Promise((resolve, reject) => {
     return api
       .getDynamicSecretValue(
@@ -12,7 +12,9 @@ function getDynamicSecret(api, secretName, variableName, akeylessToken) {
         })
       )
       .then(dynamicSecret => {
-        tl.setSecret(dynamicSecret);
+        if (exportSecretsToEnvironment) {
+          tl.setSecret(dynamicSecret);
+        }
 
         let toEnvironment = dynamicSecret;
 
@@ -20,7 +22,7 @@ function getDynamicSecret(api, secretName, variableName, akeylessToken) {
           toEnvironment = JSON.stringify(dynamicSecret);
         }
 
-        tl.setTaskVariable(variableName, toEnvironment, true);
+        tl.setTaskVariable(variableName, toEnvironment, true, exportSecretsToOutputs);
 
         resolve({variableName: dynamicSecret});
       })
@@ -30,7 +32,7 @@ function getDynamicSecret(api, secretName, variableName, akeylessToken) {
   });
 }
 
-function getStaticSecret(api, name, variableName, akeylessToken) {
+function getStaticSecret(api, name, variableName, akeylessToken, exportSecretsToEnvironment, exportSecretsToOutputs) {
   return new Promise((resolve, reject) => {
     return api
       .getSecretValue(
@@ -41,9 +43,12 @@ function getStaticSecret(api, name, variableName, akeylessToken) {
       )
       .then(staticSecret => {
         const secretValue = staticSecret[name];
-        tl.setSecret(secretValue);
 
-        tl.setTaskVariable(variableName, secretValue, true);
+        if (exportSecretsToEnvironment) {
+          tl.setSecret(secretValue);
+        }
+
+        tl.setVariable(variableName, secretValue, true, exportSecretsToOutputs);
 
         resolve(variableName, secretValue);
       })
@@ -53,20 +58,20 @@ function getStaticSecret(api, name, variableName, akeylessToken) {
   });
 }
 
-function exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl) {
+function exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl, exportSecretsToEnvironment, exportSecretsToOutputs) {
   const api = akeylessApi.api(apiUrl);
   const toAwait = [];
   for (const [akeylessPath, variableName] of Object.entries(dynamicSecrets)) {
-    toAwait.push(getDynamicSecret(api, akeylessPath, variableName, akeylessToken));
+    toAwait.push(getDynamicSecret(api, akeylessPath, variableName, akeylessToken, exportSecretsToEnvironment, exportSecretsToOutputs));
   }
   return toAwait;
 }
 
-async function exportStaticSecrets(akeylessToken, staticSecrets, apiUrl) {
+async function exportStaticSecrets(akeylessToken, staticSecrets, apiUrl, exportSecretsToEnvironment, exportSecretsToOutputs) {
   const api = akeylessApi.api(apiUrl);
   const toAwait = [];
   for (const [akeylessPath, variableName] of Object.entries(staticSecrets)) {
-    toAwait.push(getStaticSecret(api, akeylessPath, variableName, akeylessToken));
+    toAwait.push(getStaticSecret(api, akeylessPath, variableName, akeylessToken, exportSecretsToEnvironment, exportSecretsToOutputs));
   }
   return toAwait;
 }
