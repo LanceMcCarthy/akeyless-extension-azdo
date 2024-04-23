@@ -7,18 +7,22 @@ const input = require('./input');
 // https://github.com/microsoft/azure-pipelines-task-lib/blob/master/node/docs/azure-pipelines-task-lib.md
 
 async function run() {
-  tl.debug('Fetching input');
+  let akeylessToken = undefined;
+  const apiUrl = 'https://api.akeyless.io';
+  const taskId = tl.getVariable('taskGuid');
+
+  tl.logDetail((id = taskId), (message = `Gathering inputs...`), (state = tl.TaskState.InProgress));
 
   const {accessId, azureJwt, staticSecrets, dynamicSecrets, exportSecretsToOutputs, exportSecretsToEnvironment, parseDynamicSecrets} = input.fetchAndValidateInput();
 
-  tl.debug(`access id: ${accessId}`);
-
-  let akeylessToken = undefined;
-  const apiUrl = 'https://api.akeyless.io';
-
   try {
+    tl.logDetail((id = taskId), (message = `Authenticating aith akeyless...`), (state = tl.TaskState.InProgress));
+
     const akeylessLoginResponse = await auth.akeylessLogin(accessId, azureJwt, apiUrl);
+
     akeylessToken = akeylessLoginResponse['token'];
+
+    tl.logDetail((id = taskId), (message = `Got an akeyless token: ${akeylessToken}`), (state = tl.TaskState.InProgress));
   } catch (error) {
     tl.setResult(tl.TaskResult.Failed, `Failed to login to AKeyless: ${error}`);
     return;
@@ -34,18 +38,19 @@ async function run() {
 
   // static secrets
   if (staticSecrets) {
-    tl.debug(`Static Secrets: Fetching!`);
+    tl.logDetail((id = taskId), (message = `Fetching static secrets...`), (state = tl.TaskState.InProgress));
+
     toAwait.push(secrets.exportStaticSecrets(akeylessToken, staticSecrets, apiUrl, exportSecretsToEnvironment, exportSecretsToOutputs));
   } else {
-    tl.debug(`Static Secrets: Skpping step because no static secrets were specified`);
+    tl.logDetail((id = taskId), (message = `Skipping static secrets step because no static secrets were requested.`), (state = tl.TaskState.InProgress));
   }
 
   // dynamic secrets
   if (dynamicSecrets) {
-    tl.debug(`Dynamic Secrets: Fetching!`);
+    tl.logDetail((id = taskId), (message = `Fetching dynamic secrets...`), (state = tl.TaskState.InProgress));
     toAwait.push(secrets.exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl, exportSecretsToEnvironment, exportSecretsToOutputs));
   } else {
-    tl.debug(`Dynamic Secrets: Skipping step because no dynamic secrets were specified`);
+    tl.logDetail((id = taskId), (message = `Skipping dynamic secrets step because no dynamic secrets were requested.`), (state = tl.TaskState.InProgress));
   }
 }
 

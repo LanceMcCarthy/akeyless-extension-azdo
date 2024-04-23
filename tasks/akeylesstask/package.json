@@ -1,6 +1,6 @@
 {
   "name": "akeyless-extension-azdo",
-  "version": "0.1.0",
+  "version": "0.2.7",
   "description": "An Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault.",
   "main": "index.js",
   "scripts": {

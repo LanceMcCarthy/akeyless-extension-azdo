@@ -17,7 +17,7 @@ async function akeylessLogin(accessId, azureJwt, apiUrl) {
       })
     );
   } catch (error) {
-    action_fail(`Failed to login to AKeyless: ${error.message}`);
+    action_fail(`Failed to login to AKeyless: ${JSON.stringify(error.message)}`);
   }
 }
 

@@ -7,7 +7,7 @@ akeylessApi = require('../src/akeyless_api');
 akeyless = require('akeyless');
 auth = require('../src/auth');
 
-test('jwt login', async () => {
+test('mock jwt login', async () => {
   jwtToken = 'abiudsfkljbsdfvlijbkjsdflijbvsfdijnsdr;ijjbnwelkj.sdfvlkjsdfvlkjsdfvlkjnsdfvlkjnsdfv';
 
   api = jest.fn(() => {});
