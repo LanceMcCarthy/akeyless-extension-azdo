@@ -2,7 +2,7 @@ jest.mock('azure-pipelines-task-lib/task');
 jest.mock('../src/akeyless_api');
 jest.mock('akeyless');
 
-tl = require('azure-pipelines-task-lib/task');
+SDK = require('azure-pipelines-task-lib/task');
 akeylessApi = require('../src/akeyless_api');
 akeyless = require('akeyless');
 secrets = require('../src/secrets');
@@ -15,8 +15,8 @@ test('export dynamic secrets', async () => {
     session_token: 'aws-session-token'
   };
 
-  tl.setSecret = jest.fn(() => {});
-  tl.setVariable = jest.fn(() => {});
+  SDK.setSecret = jest.fn(() => {});
+  SDK.setVariable = jest.fn(() => {});
 
   api = jest.fn(() => {});
   api.getDynamicSecretValue = jest.fn(() => Promise.resolve(dynamicSecret));
@@ -31,8 +31,8 @@ test('export dynamic secrets', async () => {
     name: '/path/to/dynamic-secret'
   });
 
-  //expect(tl.setSecret).toHaveBeenCalledWith(dynamicSecret);
-  //expect(tl.setVariable).toHaveBeenCalledWith(dynamicSecret);
+  //expect(SDK.setSecret).toHaveBeenCalledWith(dynamicSecret);
+  //expect(SDK.setVariable).toHaveBeenCalledWith(dynamicSecret);
 });
 
 test('export dynamic secrets - separated', async () => {
@@ -42,8 +42,8 @@ test('export dynamic secrets - separated', async () => {
     secret_access_key: 'aws-secret-key',
     session_token: 'aws-session-token'
   };
-  tl.setSecret = jest.fn(() => {});
-  tl.setVariable = jest.fn(() => {});
+  SDK.setSecret = jest.fn(() => {});
+  SDK.setVariable = jest.fn(() => {});
 
   api = jest.fn(() => {});
   api.getDynamicSecretValue = jest.fn(() => Promise.resolve(dynamicSecret));
@@ -68,8 +68,8 @@ test('export static secrets', async () => {
   const staticSecret = {
     '/path/to/static/secret': 'super secret'
   };
-  tl.setSecret = jest.fn(() => {});
-  tl.setTaskVariable = jest.fn(() => {});
+  SDK.setSecret = jest.fn(() => {});
+  SDK.setTaskVariable = jest.fn(() => {});
 
   const api = jest.fn(() => {});
   api.getSecretValue = jest.fn(() => Promise.resolve(staticSecret));
@@ -83,6 +83,6 @@ test('export static secrets', async () => {
     token: 'akeyless-token',
     names: ['/path/to/static/secret']
   });
-  expect(tl.setSecret).toHaveBeenCalledWith('super secret');
-  expect(tl.setVariable).toHaveBeenCalledWith('sup', 'super secret', true, true);
+  expect(SDK.setSecret).toHaveBeenCalledWith('super secret');
+  expect(SDK.setVariable).toHaveBeenCalledWith('sup', 'super secret', true, true);
 });

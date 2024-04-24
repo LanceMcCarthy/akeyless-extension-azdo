@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "akeylessExtensionsAzdo",
     "name": "AKeyless Extensions for Azure DevOps",
-    "version": "0.2.7",
+    "version": "0.3.4",
     "public": false,
     "publisher": "LancelotSoftware",
     "targets": [
@@ -10,9 +10,14 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
-    "description": "An Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault.",
+    "description": "An Azure DevOps extension to securely retrieve secrets from your AKeyless vault.",
     "categories": [
         "Azure Pipelines"
+    ],
+    "galleryFlags": [
+        "Private",
+        "Free",
+        "Preview"
     ],
     "tags": [
         "release",

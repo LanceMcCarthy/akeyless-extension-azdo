@@ -1,13 +1,13 @@
-const tl = require('azure-pipelines-task-lib/task');
+const SDK = require('azure-pipelines-task-lib/task');
 const akeylessApi = require('./akeyless_api');
 const akeyless = require('akeyless');
 
 async function akeylessLogin(accessId, azureJwt, apiUrl) {
   try {
-    tl.debug('fetch token');
+    SDK.debug('fetch token');
 
     const api = akeylessApi.api(apiUrl);
-    tl.debug('Fetching token from AKeyless');
+    SDK.debug('Fetching token from AKeyless');
 
     return api.auth(
       akeyless.Auth.constructFromObject({
@@ -22,8 +22,8 @@ async function akeylessLogin(accessId, azureJwt, apiUrl) {
 }
 
 function action_fail(message) {
-  tl.debug(message);
-  tl.setResult(tl.TaskResult.Failed, message);
+  SDK.debug(message);
+  SDK.setResult(SDK.TaskResult.Failed, message);
   throw new Error(message);
 }
 

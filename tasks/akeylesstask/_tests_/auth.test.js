@@ -1,8 +1,8 @@
-jest.mock('azure-pipelines-task-lib/task');
+//jest.mock('azure-pipelines-task-lib/task');
 jest.mock('../src/akeyless_api');
 jest.mock('akeyless');
 
-tl = require('azure-pipelines-task-lib/task');
+//SDK = require('azure-pipelines-task-lib/task');
 akeylessApi = require('../src/akeyless_api');
 akeyless = require('akeyless');
 auth = require('../src/auth');
