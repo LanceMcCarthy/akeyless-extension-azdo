@@ -1,8 +1,8 @@
 {
     "manifestVersion": 1,
-    "id": "akeylessExtensionsAzdo",
-    "name": "AKeyless Extensions for Azure DevOps",
-    "version": "0.5.0",
+    "id": "akeyless-extensions",
+    "name": "AKeyless Extensions",
+    "version": "0.6.1",
     "public": true,
     "publisher": "LancelotSoftware",
     "targets": [
@@ -15,7 +15,6 @@
         "Azure Pipelines"
     ],
     "galleryFlags": [
-        "Public",
         "Free",
         "Preview"
     ],
@@ -50,10 +49,6 @@
     "icons": {
         "default": "images/akeyless-unlock-icon.png"
     },
-    "branding": {
-        "color": "green",
-        "theme": "light"
-    },
     "screenshots": [
         {
             "path": "images/screenshot.png"
@@ -81,7 +76,7 @@
     ],
     "contributions": [
         {
-            "id": "akeyless",
+            "id": "secrets",
             "type": "ms.vss-distributed-task.task",
             "targets": [
                 "ms.vss-distributed-task.tasks"
