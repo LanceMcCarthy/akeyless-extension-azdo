@@ -28,6 +28,17 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
 
 The task's outputs are determined by the values set in your `statiSecrets` and `dynamicSecrets` inputs. Whatever you have set for the secrets names will be turned into pipeline secret output variables for the task.
 
+It is also absolutely critical that you set the **Reference Name** setting of the task in your pipeline, this is what is used to reference your outputs in subseqent steps
+
+In the task setup, expand the **Outputs Variables** group and give the task a name that will be referenced later:
+
+![reference name one](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/5adc0c40-c900-4def-9a0f-8de7c025d812)
+
+Now you can use that name to access any of the secret outputs:
+
+![reference name two](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/f2110ecc-7437-4c71-b533-d9fe340a05c4)
+
+
 ### Static Secrets Outputs
 
 For static secrets, you will get an individual secret output variables for each secret. For example:
