@@ -21,15 +21,15 @@ If this is your first time using the extension, please visit the dedicated docum
 |------|----------|------|-------|
 | accessId | Yes | `string`  | The access id for your auth method, see [Getting Started - Akeyless Setup (seen in Step 1.6)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
 | azureJwt  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started - Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) |
-| staticSecrets | No | `string` | A JSON object as a string, with a list of static secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
-| dynamicSecrets | No | `string` | A JSON object as a string, with a list of dynamic secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
+| staticSecrets | No | `string` | Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See examples**. |
+| dynamicSecrets | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See examples**. |
 
 > [!IMPORTANT]
 > When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
 
 ## Outputs
 
-The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs and are reference using the task's `id` value. Whatever you have set for the secret's names will be turned into output variables for the task.
+The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs and are referenced using the task's `id` value. Whatever you have set for the secret's names will be turned into output variables for the task.
 
 ```powershell
 # To get the output, you only need the ID of the task and the output variable's name
@@ -59,6 +59,7 @@ steps:
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
 - task: LancelotSoftware.akeylessExtensionAzdo@1
+  id: 'MyAkeylessTask'
   displayName: MyAkeylessTask
   inputs:
     accessid: 'p-123456'
@@ -69,9 +70,9 @@ Notice how we are using the `azure_jwt` output from the AzureCLI task to hold th
 
 You will have `$(MyAkeylessTask.first_secret)` and  `$(MyAkeylessTask.second_secret)` available in subsequent tasks of that job.
 
-## Dynamic Secrets Output
+## Dynamic Secrets
 
-For dynamic secret, it will only be a single variable. For example:
+For dynamic secrets, the output variable that holds all of that dynamic secret's output. For example:
 
 ```yaml
 steps:
@@ -86,7 +87,9 @@ steps:
      $FRESH_JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$FRESH_JWT"
 
+# We are using $(AzureCLI.azure_jwt)
 - task: LancelotSoftware.akeylessExtensionAzdo@1
+  id: 'MyAkeylessTask'
   displayName: MyAkeylessTask
   inputs:
     accessid: 'p-123456'
@@ -94,6 +97,15 @@ steps:
     staticSecrets: '{"/path/to/dynamic/secret":"my_dynamic_secret"}'
 ```
 
-Notice how we are using the `azure_jwt` output from the AzureCLI task to hold the JWT, then use it in the Akeyless task with `$(AzureCLI.azure_jwt)`.
+You will have `$(MyAkeylessTask.my_dynamic_secret)` available in subsequent tasks of that job. Note that dynamic secrets tend to be complex objects and you will likely need to further process the value to get an inner value.
 
-You will have `$(MyAkeylessTask.my_dynamic_secret)` available in subsequent tasks of that job. Note that dynamic secrets tend to be large complex objects and you will likely need to further process the value to get an inner value. For example, using `jq`.
+For example, with a SQL dynamics secret you you can use `jq` to get at each separate value.
+
+```
+echo '$(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)' | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
+
+echo $SQL.id
+echo $SQL.user
+echo $SQL.ttl_in_minutes
+echo $SQL.password
+```
