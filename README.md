@@ -2,7 +2,6 @@
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
-- [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
   - [Getting Started](#getting-started)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
@@ -13,15 +12,15 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
 
 If this is your first time using the extension, please visit the dedicated documentation to have the required prerequisites prepared.
 
-- [Getting Started](/docs/getting-started.md) - Setup akeyless and Azure service principal
-- [Example (Tutorial)](/docs/examples.md) - Complete walkthough demo
+- [Getting Started](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md) - Setup akeyless and Azure service principal
+- [Example (Tutorial)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/examples.md) - Complete walkthough demo
 
 ## Inputs
 
 | Name | Required | Type | Value |
 |------|----------|------|-------|
-| accessId | Yes | `string`  | The access id for your auth method |
-| azureJwt  | Yes | `string`  | This is the JWT you recieved in a previous step. Please visit the [] |
+| accessId | Yes | `string`  | The access id for your auth method, see [Getting Started - Akeyless Setup ()](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
+| azureJwt  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started - Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) |
 | staticSecrets | No | `string` | A JSON object as a string, with a list of static secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
 | dynamicSecrets | No | `string` | A JSON object as a string, with a list of dynamic secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
 
