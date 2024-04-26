@@ -3,49 +3,53 @@
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
 - [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
-    - [Inputs](#inputs)
-    - [Outputs](#outputs)
-    - [Static Secrets Outputs](#static-secrets-outputs)
-      - [Dynamic Secrets Output](#dynamic-secrets-output)
-  - [AKeyless Setup](#akeyless-setup)
-    - [Authentication](#authentication)
-  - [Examples](#examples)
+  - [Getting Started](#getting-started)
+  - [Inputs](#inputs)
+  - [Outputs](#outputs)
+  - [Static Secrets](#static-secrets)
+  - [Dynamic Secrets Output](#dynamic-secrets-output)
 
-### Inputs
+## Getting Started
+
+If this is your first time using the extension, please visit the dedicated documentation to have the required prerequisites prepared.
+
+- [Getting Started](/docs/getting-started.md) - Setup akeyless and Azure service principal
+- [Example (Tutorial)](/docs/examples.md) - Complete walkthough demo
+
+## Inputs
 
 | Name | Required | Type | Value |
 |------|----------|------|-------|
 | accessId | Yes | `string`  | The access id for your auth method |
-| azureJwt  | Yes | `string`  | This is the JWT you recieved in a previous step (e.g., `$JWT=$(az account get-access-token --query accessToken --output tsv)`) |
+| azureJwt  | Yes | `string`  | This is the JWT you recieved in a previous step. Please visit the [] |
 | staticSecrets | No | `string` | A JSON object as a string, with a list of static secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
 | dynamicSecrets | No | `string` | A JSON object as a string, with a list of dynamic secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
 
 > [!IMPORTANT]
 > When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
 
+## Outputs
 
-### Outputs
+The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs and are reference using the task's `id` value. Whatever you have set for the secret's names will be turned into output variables for the task.
 
-The task's outputs are determined by the values set in your `statiSecrets` and `dynamicSecrets` inputs. Whatever you have set for the secrets names will be turned into pipeline secret output variables for the task.
+```powershell
+# To get the output, you only need the ID of the task and the output variable's name
+$(Task_ID.VARIABLE_NAME)
+```
 
-It is also absolutely critical that you set the **Reference Name** setting of the task in your pipeline, this is what is used to reference your outputs in subseqent steps
+> [!WARNING]
+> If you are using classic pipelines, it is **critical** that you set the `Reference Name` setting of the task in your pipeline, this becomes the TASK_ID in the example above (YAML pipelines let you set the `id` directly).
 
-In the task setup, expand the **Outputs Variables** group and give the task a name that will be referenced later:
+![reference name](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/ffa9c867-33b3-42a3-ba0d-23c111ca153d)
 
-![reference name one](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/5adc0c40-c900-4def-9a0f-8de7c025d812)
-
-Now you can use that name to access any of the secret outputs:
-
-![reference name two](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/f2110ecc-7437-4c71-b533-d9fe340a05c4)
-
-
-### Static Secrets Outputs
+## Static Secrets
 
 For static secrets, you will get an individual secret output variables for each secret. For example:
 
 ```yaml
 steps:
 - task: AzureCLI@2
+  id: 'AzureCLI'
   displayName: AzureCLI
   inputs:
     azureSubscription: 'My Azure Service Principal'
@@ -55,7 +59,7 @@ steps:
      $JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
-- task: LancelotSoftware.akeylessExtensionsAzdo.akeyless-extensions-task.akeylessExtensionAzdo@0
+- task: LancelotSoftware.akeylessExtensionAzdo@1
   displayName: MyAkeylessTask
   inputs:
     accessid: 'p-123456'
@@ -66,13 +70,14 @@ Notice how we are using the `azure_jwt` output from the AzureCLI task to hold th
 
 You will have `$(MyAkeylessTask.first_secret)` and  `$(MyAkeylessTask.second_secret)` available in subsequent tasks of that job.
 
-#### Dynamic Secrets Output
+## Dynamic Secrets Output
 
 For dynamic secret, it will only be a single variable. For example:
 
 ```yaml
 steps:
 - task: AzureCLI@2
+  id: 'AzureCLI'
   displayName: AzureCLI
   inputs:
     azureSubscription: 'My Azure Service Principal'
@@ -82,7 +87,7 @@ steps:
      $FRESH_JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$FRESH_JWT"
 
-- task: LancelotSoftware.akeylessExtensionsAzdo.akeyless-extensions-task.akeylessExtensionAzdo@0
+- task: LancelotSoftware.akeylessExtensionAzdo@1
   displayName: MyAkeylessTask
   inputs:
     accessid: 'p-123456'
@@ -93,55 +98,3 @@ steps:
 Notice how we are using the `azure_jwt` output from the AzureCLI task to hold the JWT, then use it in the Akeyless task with `$(AzureCLI.azure_jwt)`.
 
 You will have `$(MyAkeylessTask.my_dynamic_secret)` available in subsequent tasks of that job. Note that dynamic secrets tend to be large complex objects and you will likely need to further process the value to get an inner value. For example, using `jq`.
-
-## AKeyless Setup
-
-### Authentication
-
-This action supports authenticating with AKeyless using JWT generated by an Azure service principal (via the pipeline's Service connections setting).
-
-To configure AKeyless and grant your repositories the necessary permissions:
-
-1. Create a new JWT Auth method in AKeyless if you don't have one (you can safely share the auth method between repositories)
-    1. In AKeyless go to "Auth Methods" -> "+ New" -> "OAuth 2.0/JWT".
-    2. Specify a name (e.g. "Azure JWT Auth") and location of your choice.
-    3. For the JWKS Url, specify `https://login.microsoftonline.com/common/discovery/keys`
-    4. For the unique identifier use `tenantId`. See note (1) below for more details.
-    5. You **MUST** click "Require Sub Claim on role association".  This will prevent you from attaching this to a role without any additional checks **that make this a critical checkbox!!!**
-2. Create an appropriate access role (if you don't already have one)
-    1. In AKeyless go to "Access Roles" -> "+ New"
-    2. Give it a name and location, and create it.
-    3. Find your new access role and click on it to edit it.
-    4. On the right side, under "Secrets & Keys", click the "Add" button to configure read access to any static or dynamic secrets you will fetch from your pipeline.
-3. Attach your Azure JWT Auth method to your access role
-    1. Once again, find the access role you created in step #2 above and click on it to edit it.
-    2. Hit the "+ Associate" button to associate your newly created auth method with this access role.
-    3. In the list, find the auth method you created in Step #1 above (we named it "Azure JWT Auth")
-    4. Add an appropriate subclaim. **See note (2) below for more details.**
-    5. Save!
-
-After following these steps, you'll be ready to use JWT Auth from your Azure DevOps
-
-**(1) Note:** The unique identifier is mainly used for auditing/billing purposes, so there isn't one correct answer here.  `tenantId` or even `appId` is a sensible default. If you are uncertain, talk to AKeyless for more details.
-
-**(2) Note:** Subclaim checks allow AKeyless to grant access to specific workflows, based on the claims that are provided in the JWT. We **strongly** recommend restricting the access by using the service principal's `appId` for the required subclaim.
-
-For Azure Service Principal, here is a small portion of the subclaims map that akeyless can use:
-
-```
-[
-  appid:[your-service-principal-app-id] 
-  aud:[https://management.core.windows.net/]
-  idp:[https://sts.windows.net/your-tenant-id/]
-  iss:[https://sts.windows.net/your-tenant-id/]
-  sub:[your-subscription-id] 
-  tid:[your-tenant-id] 
-  ...
-]
-```
-
-Using the `appId` allows you to make sure only that exact service principal can access the secrets. While using a tenantId allos any service principal in the org to access them. Choose appropriately for your needs.
-
-## Examples
-
-Here are some examples you can use for guidance:
