@@ -19,7 +19,7 @@ If this is your first time using the extension, please visit the dedicated docum
 
 | Name | Required | Type | Value |
 |------|----------|------|-------|
-| accessId | Yes | `string`  | The access id for your auth method, see [Getting Started - Akeyless Setup ()](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
+| accessId | Yes | `string`  | The access id for your auth method, see [Getting Started - Akeyless Setup (seen in Step 1.6)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
 | azureJwt  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started - Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) |
 | staticSecrets | No | `string` | A JSON object as a string, with a list of static secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
 | dynamicSecrets | No | `string` | A JSON object as a string, with a list of dynamic secrets to fetch/export. The key should be the path to the secret and the value should be the name of the environment variable/output to save it to. **See examples**. |
