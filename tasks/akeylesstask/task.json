@@ -60,7 +60,7 @@
             "defaultValue": "",
             "groupName": "general",
             "required": false,
-            "helpMarkDown": "Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be names. \r\n\nExample: {\"/path/to/static/secret\":\"my_first_secret\", \"/path/to/another/secret\":\"my_second_secret\"}."
+            "helpMarkDown": "Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. \r\n\nExample: {\"/path/to/static/secret\":\"my_first_secret\", \"/path/to/another/secret\":\"my_second_secret\"}."
         },
         {
             "name": "dynamicSecrets",
@@ -69,7 +69,7 @@
             "defaultValue": "",
             "groupName": "general",
             "required": false,
-            "helpMarkDown": "Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be names.\r\n\nExample: {\"/path/to/secret\":\"name_of_output_var\"}."
+            "helpMarkDown": "Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named.\r\n\nExample: {\"/path/to/secret\":\"name_of_output_var\"}."
         }
     ],
     "execution": {
