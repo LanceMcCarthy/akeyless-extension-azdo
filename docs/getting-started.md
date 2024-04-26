@@ -82,10 +82,7 @@ After following these steps, you'll be ready to use JWT Auth from your Azure Dev
 
 ```
 [
-  appid:[your-service-principal-app-id] 
-  aud:[https://management.core.windows.net/]
-  idp:[https://sts.windows.net/your-tenant-id/]
-  iss:[https://sts.windows.net/your-tenant-id/]>
+  appid:[your-service-principal-app-id]
   sub:[your-subscription-id] 
   tid:[your-tenant-id] 
   ...
