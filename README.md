@@ -2,11 +2,12 @@
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
+- [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
   - [Getting Started](#getting-started)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
   - [Static Secrets](#static-secrets)
-  - [Dynamic Secrets Output](#dynamic-secrets-output)
+  - [Dynamic Secrets](#dynamic-secrets)
 
 ## Getting Started
 
@@ -58,7 +59,7 @@ steps:
      $JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
-- task: LancelotSoftware.akeylessExtensionAzdo@1
+- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
   id: 'MyAkeylessTask'
   displayName: MyAkeylessTask
   inputs:
@@ -88,7 +89,7 @@ steps:
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$FRESH_JWT"
 
 # We are using $(AzureCLI.azure_jwt)
-- task: LancelotSoftware.akeylessExtensionAzdo@1
+- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
   id: 'MyAkeylessTask'
   displayName: MyAkeylessTask
   inputs:
