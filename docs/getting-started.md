@@ -8,7 +8,7 @@ In order to use this, you will need two things configured:
 Let me take you through setting each up.
 
 > [!NOTE]
-> You may have some of these items alreadt. For example, #1 is a very common thing to already have available to your pipeline. Feel free to skip any "create a new" steps, but just make sure the configuration of the existing item matches the requirements.
+> You may have some of these items already. For example, #1 is a very common thing to already have available to your pipeline. Feel free to skip any "create a new" steps, but just make sure the configuration of the existing item matches the requirements.
 
 ## Azure Setup
 
@@ -22,7 +22,7 @@ If you need to create one, here are the steps:
 4. Select "Azure Resource Manager"
 5. Select "Service principal (automatic)" (or "Workload Identity federation (automatic)" for modern set ups, it does the same thing as a service principal)
 6. Complete the form with your Azure subscription selections
-   1. There's a checkbox to allow the service connection to be accessible by all of that project's pipelines. this is up to your needs, but you can select the principal later on when setting up the Azure CLI task.
+   1. There's a checkbox to allow the service connection to be accessible by all of that project's pipelines. This is up to your needs, but you can select the principal later on when setting up the Azure CLI task.
 
 When it is complete, select the item to see the details view. Here you will see a link that will bring you over to the Azure portal.
 
@@ -64,7 +64,7 @@ To configure AKeyless and grant your repositories the necessary permissions:
     2. Hit the **+ Associate** button
     3. In the dropdown list, find the auth method you created in Step #1 above and select it (we named it "Azure JWT Auth")
     4. IMPORTANT: Add an appropriate subclaim
-       - I recommend using the service principal's `appid` (case sensitive!)to restrict access to only that this. **See note (2) below for more details and a subclaims list.**
+       - I recommend using the service principal's `appid` (case sensitive!)to restrict access. **See note (2) below for more details and a subclaims list.**
     5. Save!
 
 After following these steps, you'll be ready to use JWT Auth from your Azure DevOps. Go to the [Examples documentation] to see a starter pipeline.
@@ -91,4 +91,4 @@ After following these steps, you'll be ready to use JWT Auth from your Azure Dev
   ...
 ]
 ```
-Using the `appid` allows you to make sure only that exact service principal can access the secrets. While using a tenantId allos any service principal in the org to access them. Choose appropriately for your needs. 
+Using the `appid` allows you to make sure only that exact service principal can access the secrets. While using a tenantId allows any service principal in the org to access them. Choose appropriately for your needs. 
