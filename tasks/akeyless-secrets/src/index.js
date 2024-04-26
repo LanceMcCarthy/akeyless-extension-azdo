@@ -50,7 +50,7 @@ async function run() {
   if (staticSecrets) {
     console.log(`[Static Secrets] Fetching static secrets...`);
 
-    await secrets.exportStaticSecrets(akeylessToken, staticSecrets, apiUrl);
+    toAwait.push(secrets.exportStaticSecrets(akeylessToken, staticSecrets, apiUrl));
   } else {
     console.log(`[Static Secrets] Skipping static secrets step because no static secrets were requested.`);
   }
@@ -59,7 +59,7 @@ async function run() {
   if (dynamicSecrets) {
     console.log(`[Dynamic Secrets] Fetching dynamic secrets...`);
 
-    await secrets.exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl);
+    toAwait.push(secrets.exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl));
   } else {
     console.log(`[Dynamic Secrets] Skipping dynamic secrets step because no dynamic secrets were requested.`);
   }
