@@ -2,8 +2,8 @@
     "manifestVersion": 1,
     "id": "akeylessExtensionsAzdo",
     "name": "AKeyless Extensions for Azure DevOps",
-    "version": "0.3.4",
-    "public": false,
+    "version": "0.5.0",
+    "public": true,
     "publisher": "LancelotSoftware",
     "targets": [
         {
@@ -15,7 +15,7 @@
         "Azure Pipelines"
     ],
     "galleryFlags": [
-        "Private",
+        "Public",
         "Free",
         "Preview"
     ],
@@ -81,7 +81,7 @@
     ],
     "contributions": [
         {
-            "id": "akeyless-extensions-task",
+            "id": "akeyless",
             "type": "ms.vss-distributed-task.task",
             "targets": [
                 "ms.vss-distributed-task.tasks"
