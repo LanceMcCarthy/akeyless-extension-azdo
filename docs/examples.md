@@ -20,7 +20,7 @@ So that you can follow this tutorial exactly, in Akeyless, you want to create a 
 
 ## Task 1 - Azure CLI
 
-To start the workflow, we need an Azure CLI Task to fetch a new short-lived JWT token. Sicne this is a sensitive value, we want to safely pass the JWT to a subsequent step.
+To start the workflow, we need an Azure CLI Task to fetch a new short-lived JWT token. Since this is a sensitive value, we want to safely pass the JWT to a subsequent step.
 
 This is done using the `##vso[task.setvariable]` command, which has three parameters:
 
@@ -85,7 +85,7 @@ Remember, the path to the secret in akeyless is `/personal-keys/mccarthy/azdo-te
 
 ## Task 3 - Verifying the Secret
 
-Sicne this is a sample, and we know the value that we are epecting from Akeyless, we can have a little fun with checking the value:
+Since this is a sample, and we know the value that we are expecting from Akeyless, we can have a little fun with checking the value:
 
 ```yaml
 - name: "Verify Jedi Status"
