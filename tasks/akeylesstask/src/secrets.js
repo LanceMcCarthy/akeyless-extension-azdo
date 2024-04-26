@@ -2,68 +2,10 @@ const SDK = require('azure-pipelines-task-lib/task');
 const akeylessApi = require('./akeyless_api');
 const akeyless = require('akeyless');
 
-function getDynamicSecret(api, secretName, variableName, akeylessToken) {
-  return new Promise((resolve, reject) => {
-    return api
-      .getDynamicSecretValue(
-        akeyless.GetDynamicSecretValue.constructFromObject({
-          token: akeylessToken,
-          name: secretName
-        })
-      )
-      .then(dynamicSecret => {
-        // if (exportSecretsToEnvironment) {
-        //   SDK.setSecret(dynamicSecret);
-        // }
-
-        let toEnvironment = dynamicSecret;
-
-        // if this is an object, may need to serialize it
-        if (dynamicSecret.constructor === Array || dynamicSecret.constructor === Object) {
-          toEnvironment = JSON.stringify(dynamicSecret);
-        }
-
-        SDK.setTaskVariable(variableName, toEnvironment, true, true);
-
-        resolve({variableName: dynamicSecret});
-      })
-      .catch(error => {
-        reject(JSON.stringify(error));
-      });
-  });
-}
-
-function getStaticSecret(api, name, variableName, akeylessToken) {
-  return new Promise((resolve, reject) => {
-    return api
-      .getSecretValue(
-        akeyless.GetSecretValue.constructFromObject({
-          token: akeylessToken,
-          names: [name]
-        })
-      )
-      .then(staticSecret => {
-        const secretValue = staticSecret[name];
-
-        // if (exportSecretsToEnvironment) {
-        //   SDK.setSecret(secretValue);
-        // }
-
-        SDK.setVariable(variableName, secretValue, true, true);
-
-        resolve(variableName, secretValue);
-      })
-      .catch(error => {
-        reject(JSON.stringify(error));
-        //reject(error);
-      });
-  });
-}
-
 async function exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl) {
   const api = akeylessApi.api(apiUrl);
-  const toAwait = [];
 
+  // Deserialize the input so we can get a dictionary the dynamic secret's path and the variable name to use for output
   let secretsDictionary = (secretsDictionary = JSON.parse(dynamicSecrets));
 
   if (secretsDictionary === undefined) {
@@ -74,19 +16,27 @@ async function exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl) {
   }
 
   for (const akeylessPath of Object.keys(secretsDictionary)) {
+    // Get user's desired name for the variable
     let variableName = secretsDictionary[akeylessPath];
 
+    // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
     console.log(`Requesting ${akeylessPath} from akeyless, to be exported in ${variableName}...`);
 
-    toAwait.push(getDynamicSecret(api, akeylessPath, variableName, akeylessToken));
+    // Create the request body
+    const body = akeyless.GetSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
+
+    // Fetch the secret
+    api
+      .getSecretValue(body)
+      .then(secretResult => success(variableName, secretResult[akeylessPath]))
+      .catch(error => fail(variableName, JSON.stringify(error)));
   }
-  return toAwait;
 }
 
 async function exportStaticSecrets(akeylessToken, staticSecrets, apiUrl) {
   const api = akeylessApi.api(apiUrl);
-  const toAwait = [];
 
+  // Deserialize the input so we can get a dictionary of secret paths and it's desired output variable name
   const secretsDictionary = JSON.parse(staticSecrets);
 
   if (secretsDictionary === undefined) {
@@ -96,15 +46,36 @@ async function exportStaticSecrets(akeylessToken, staticSecrets, apiUrl) {
     );
   }
 
+  // GET SECRETS
   for (const akeylessPath of Object.keys(secretsDictionary)) {
+    // Get the name to be used for the output variable
     let variableName = secretsDictionary[akeylessPath];
 
-    console.log(`Requesting ${akeylessPath} from akeyless, to be exported in ${variableName}...`);
+    // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
+    console.log(`Requesting '${akeylessPath}' from akeyless...`);
 
-    toAwait.push(getStaticSecret(api, akeylessPath, secretsDictionary[akeylessPath], akeylessToken));
+    // Create the request body
+    const body = akeyless.GetSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
+
+    // Fetch the secret
+    api
+      .getSecretValue(body)
+      .then(secretResult => success(variableName, secretResult[akeylessPath]))
+      .catch(error => fail(variableName, JSON.stringify(error)));
   }
+}
 
-  return toAwait;
+function success(name, value) {
+  SDK.setVariable(name, value, true, true);
+
+  console.log(
+    `✅ Success! '${akeylessPath}' was fetched, the value will be available in the '${variableName}' output variable. !!! IMPORTANT !!! Make sure you have set the 'Output Variables > Reference Name' for your task or you will not be able to reference the output variable in subsequent tasks.`
+  );
+}
+
+function fail(name, errorText) {
+  // Fail if there was troubvle getting any expected secret
+  SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${name}'. Error: ${errorText}.`);
 }
 
 exports.exportDynamicSecrets = exportDynamicSecrets;

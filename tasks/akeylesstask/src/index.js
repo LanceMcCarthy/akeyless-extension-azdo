@@ -2,9 +2,6 @@ const SDK = require('azure-pipelines-task-lib/task');
 const auth = require('./auth');
 const secrets = require('./secrets');
 
-// Azure AzDO Extensions SDK reference
-// https://github.com/microsoft/azure-pipelines-task-lib/blob/master/node/docs/azure-pipelines-task-lib.md
-
 async function run() {
   // Phase 1 - Get inputs and validate
   const accessId = SDK.getInput('accessId', true);
@@ -49,13 +46,11 @@ async function run() {
 
   // Phase 3 - Fetch akeyless secrets
 
-  const toAwait = [];
-
   // static secrets
   if (staticSecrets) {
     console.log(`[Static Secrets] Fetching static secrets...`);
 
-    toAwait.push(secrets.exportStaticSecrets(akeylessToken, staticSecrets, apiUrl));
+    await secrets.exportStaticSecrets(akeylessToken, staticSecrets, apiUrl);
   } else {
     console.log(`[Static Secrets] Skipping static secrets step because no static secrets were requested.`);
   }
@@ -64,7 +59,7 @@ async function run() {
   if (dynamicSecrets) {
     console.log(`[Dynamic Secrets] Fetching dynamic secrets...`);
 
-    toAwait.push(secrets.exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl));
+    await secrets.exportDynamicSecrets(akeylessToken, dynamicSecrets, apiUrl);
   } else {
     console.log(`[Dynamic Secrets] Skipping dynamic secrets step because no dynamic secrets were requested.`);
   }
