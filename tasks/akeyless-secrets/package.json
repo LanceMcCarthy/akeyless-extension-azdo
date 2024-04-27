@@ -7,7 +7,6 @@
     "restore": "npm install",
     "format": "prettier --write **/*.js",
     "lint": "eslint **/*.js",
-    "test": "jest",
     "precommit": "npm run format && npm run lint && npm run test",
     "package": "cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json",
     "package-version-bump": "cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json  --rev-version"
@@ -30,7 +29,6 @@
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
-    "eslint-plugin-jest": "^28.2.0",
     "eslint-plugin-prettier": "^5.1.3",
     "globals": "^15.0.0",
     "prettier": "^3.2.5"

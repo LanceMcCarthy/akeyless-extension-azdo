@@ -15,7 +15,7 @@ export default [
         "i18n-text/no-en": 0,
         "prefer-template": "off",
         "filenames/match-regex": "off",
-        "no-unused-vars": "off",
+        "no-unused-vars": "warn",
         "camelcase": "off"
      }
   },{
