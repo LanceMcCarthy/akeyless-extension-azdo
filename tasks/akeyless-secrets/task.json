@@ -12,9 +12,9 @@
         "Release"
     ],
     "version": {
-        "Major": 0,
-        "Minor": 6,
-        "Patch": 3
+        "Major": 1,
+        "Minor": 0,
+        "Patch": 0
     },
     "instanceNameFormat": "Akeyless Secrets",
     "groups": [
@@ -27,11 +27,6 @@
             "name": "advanced",
             "displayName": "Advanced",
             "isExpanded": false
-        },
-        {
-            "name": "validations",
-            "displayName": "Validations",
-            "isExpanded": true
         }
     ],
     "inputs": [
@@ -70,6 +65,15 @@
             "groupName": "general",
             "required": false,
             "helpMarkDown": "Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named.\r\n\nExample: {\"/path/to/secret\":\"name_of_output_var\"}."
+        },
+        {
+            "name": "apiUrl",
+            "type": "string",
+            "label": "Akeyless API Url",
+            "defaultValue": "https://api.akeyless.io",
+            "groupName": "advanced",
+            "required": false,
+            "helpMarkDown": "Overrides the URL to the akeyless API server. Warning - Do not set this unless you know what you're doing!"
         }
     ],
     "execution": {

@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "akeyless-extensions",
     "name": "AKeyless Extensions",
-    "version": "0.6.3",
+    "version": "1.0.0",
     "public": true,
     "publisher": "LancelotSoftware",
     "targets": [
