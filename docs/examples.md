@@ -43,8 +43,8 @@ Therefore, here is what the full task should look like:
 
 ```yml
 - task: AzureCLI@2
-  id: 'AzureCLI'
-  displayName: "Generate JWT"
+  name: 'AzureCLI'
+  displayName: 'Get JWT from Azure'
   inputs:
     azureSubscription: 'Your-Service-Principal-Name-Goes-Here'
     scriptType: ps
@@ -68,9 +68,9 @@ Now, we can use the JWT token to authenticate with Akeyless. Let's add the Akeyl
 Remember, the path to the secret in akeyless is `/personal-keys/mccarthy/azdo-test-secret`. In the snippet below, I have chosen `OBI_WAN` to be the name for the output, but you can use any valid string (A-Z, a-z, 0-9, -, _).
 
 ```yml
-- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
-  id: 'Akeyless1'
-  displayName: MyAkeylessTask
+- task: akeyless-secrets@1
+  name: 'Akeyless1'
+  displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
@@ -112,8 +112,8 @@ Here's what all the steps look like together
 ```YAML
 steps:
 - task: AzureCLI@2
-  id: 'AzureCLI'
-  displayName: "Generate JWT"
+  name: 'AzureCLI'
+  displayName: 'Get JWT from Azure'
   inputs:
     azureSubscription: 'Your-Service-Principal-Name-Goes-Here'
     scriptType: ps
@@ -122,9 +122,9 @@ steps:
      $JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
-- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
-  id: 'Akeyless1'
-  displayName: MyAkeylessTask
+- task: akeyless-secrets@1
+  name: 'Akeyless1'
+  displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
@@ -151,9 +151,9 @@ and finally, after you run the pipeline, the output of the Verify task will be:
 In the real-world, you would not be using that "verify jedi status" step that leaks your secret in plain text. So, to share a real example, here's what it would look like to set a private nuget server's package source credentials using two separate static secrets.
 
 ```yaml
-- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
-  id: 'Akeyless1'
-  displayName: MyAkeylessTask
+- task: akeyless-secrets@1
+  name: 'Akeyless1'
+  displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'

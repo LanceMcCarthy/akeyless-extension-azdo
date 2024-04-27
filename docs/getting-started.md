@@ -16,13 +16,13 @@ You need to be able to prove the identiy of the pipeline requesting access to Ak
 
 If you need to create one, here are the steps:
 
-1. In your Azure DevOps project, click Settings (bottom left on most screens)
+1. In your Azure DevOps project, click 'Project Settings' (bottom left).
 2. In the left menu, find and select "Service Connections"
-3. Click "New Service Connection"
-4. Select "Azure Resource Manager"
-5. Select "Service principal (automatic)" (or "Workload Identity federation (automatic)" for modern set ups, it does the same thing as a service principal)
-6. Complete the form with your Azure subscription selections
-   1. There's a checkbox to allow the service connection to be accessible by all of that project's pipelines. This is up to your needs, but you can select the principal later on when setting up the Azure CLI task.
+3. Click "New Service Connection".
+4. Select "Azure Resource Manager".
+5. Select "Service principal (automatic)" (or "Workload Identity federation (automatic)" for modern set ups, it does the same thing as a service principal).
+6. Complete the form with your Azure subscription selections.
+   - Note: There's a checkbox to allow the service connection to be accessible by all of that project's pipelines, or you can wait to select it when configuring the Azure CLI task in the pipeline.
 
 When it is complete, select the item to see the details view. Here you will see a link that will bring you over to the Azure portal.
 
