@@ -2,16 +2,20 @@
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
-- [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
-  - [Getting Started](#getting-started)
-  - [Inputs](#inputs)
-  - [Outputs](#outputs)
-  - [Static Secrets](#static-secrets)
-  - [Dynamic Secrets](#dynamic-secrets)
+- [Getting Started](#getting-started)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Static Secrets](#static-secrets)
+- [Dynamic Secrets](#dynamic-secrets)
 
 ## Getting Started
 
-If this is your first time using the extension, please visit the dedicated documentation to have the required prerequisites prepared.
+You can add the extension to your Azure DevOps pipeline in one of two ways:
+
+- Option 1 - Search for 'akeyless secrets' when adding a new task.
+- Option 2 - Go to [Akeyless Extensions - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=LancelotSoftware.akeyless-extensions)
+
+If this is your first time using the extension, please visit the documentation to have the required prerequisites prepared.
 
 - [Getting Started](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md) - Setup akeyless and Azure service principal
 - [Example (Tutorial)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/examples.md) - Complete walkthough demo
@@ -20,27 +24,42 @@ If this is your first time using the extension, please visit the dedicated docum
 
 | Name | Required | Type | Value |
 |------|----------|------|-------|
-| accessId | Yes | `string`  | The access id for your auth method, see [Getting Started - Akeyless Setup (seen in Step 1.6)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
-| azureJwt  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started - Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) |
-| staticSecrets | No | `string` | Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See examples**. |
-| dynamicSecrets | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See examples**. |
+| `accessId` | Yes | `string`  | The access id for your auth method, see [Getting Started: Akeyless Setup (step 1.6)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
+| `azureJwt`  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started: Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) |
+| `staticSecrets` | No | `string` | Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. |
+| `dynamicSecrets` | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. |
+| `apiUrl` | No | `string`  | Overrides the URL to the akeyless API server. Warning - Do not set this unless you know what you're doing! |
 
 > [!IMPORTANT]
 > When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
 
 ## Outputs
 
-The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs and are referenced using the task's `id` value. Whatever you have set for the secret's names will be turned into output variables for the task.
+The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs. In order to access these outputs, you need to set the **reference name** of the task.
 
-```powershell
-# To get the output, you only need the ID of the task and the output variable's name
-$(Task_ID.VARIABLE_NAME)
+### YAML Pipelines
+
+When writing the task in YAML, you set the reference name using the `name` property:
+
+```yml
+- task: akeyless-secrets@1
+  name: 'MyAkeylessTask'
+  displayName: 'this is only for display purposes'
 ```
 
-> [!WARNING]
-> If you are using classic pipelines, it is **critical** that you set the `Reference Name` setting of the task in your pipeline, this becomes the TASK_ID in the example above (YAML pipelines let you set the `id` directly).
+### Classic Pipelines
 
-![reference name](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/ffa9c867-33b3-42a3-ba0d-23c111ca153d)
+If you are using classic pipelines, you will find the  `Reference Name` setting under the Output Variables section:
+
+![ref name](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/a7109870-2660-43f2-9878-42ee6f1dfe6a)
+
+### Accessing the Output
+
+Now with the reference name, you can access the output(s):
+
+```powershell
+$(MyAkeylessTask.my_output)
+```
 
 ## Static Secrets
 
@@ -49,8 +68,8 @@ For static secrets, you will get an individual secret output variables for each 
 ```yaml
 steps:
 - task: AzureCLI@2
-  id: 'AzureCLI'
-  displayName: AzureCLI
+  name: 'AzureCLI'
+  displayName: 'Get JWT from Azure'
   inputs:
     azureSubscription: 'My Azure Service Principal'
     scriptType: ps
@@ -59,9 +78,9 @@ steps:
      $JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
-- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
-  id: 'MyAkeylessTask'
-  displayName: MyAkeylessTask
+- task: akeyless-secrets@1
+  name: 'MyAkeylessTask'
+  displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
@@ -78,8 +97,8 @@ For dynamic secrets, the output variable that holds all of that dynamic secret's
 ```yaml
 steps:
 - task: AzureCLI@2
-  id: 'AzureCLI'
-  displayName: AzureCLI
+  name: 'AzureCLI'
+  displayName: 'Get JWT from Azure'
   inputs:
     azureSubscription: 'My Azure Service Principal'
     scriptType: ps
@@ -89,9 +108,9 @@ steps:
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$FRESH_JWT"
 
 # We are using $(AzureCLI.azure_jwt)
-- task: LancelotSoftware.akeyless-extensions.secrets.akeyless-secrets@1
-  id: 'MyAkeylessTask'
-  displayName: MyAkeylessTask
+- task: akeyless-secrets@1
+  name: 'MyAkeylessTask'
+  displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
