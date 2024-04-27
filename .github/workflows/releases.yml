@@ -1,0 +1,41 @@
+name: 'Prepare Releases'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "releases/*"
+    paths:
+      - 'src/tasks/**/*'
+      - '.github/workflows/releases.yml'
+
+jobs:
+  build-and-package:
+    runs-on: windows-latest
+    name: Prepare and Package
+    permissions:
+      packages: write
+      contents: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: "Run scripts and package extension"
+      working-directory: '${{ github.workspace }}\tasks\akeyless-secrets'
+      run: |
+        npm run restore
+        npm run format
+        npm run lint
+        npm i -g tfx-cli    # tfx CLI docs https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md
+        npm run package     # Create VSIX
+      env:
+        NODE_OPTIONS: "--max_old_space_size=4096"
+
+    - uses: actions/upload-artifact@v4
+      name: "Attach Artifact"
+      with:
+        name: lancelotsoftware.akeyless-secrets
+        path: "**/*.vsix"
+        retention-days: 30
