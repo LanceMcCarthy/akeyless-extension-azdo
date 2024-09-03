@@ -5,14 +5,13 @@ on:
   push:
     branches:
       - "releases/*"
-    paths:
-      - 'src/tasks/**/*'
-      - '.github/workflows/releases.yml'
 
 jobs:
   build-and-package:
     runs-on: windows-latest
     name: Prepare and Package
+    env:
+        NODE_OPTIONS: "--max_old_space_size=4096"
     permissions:
       packages: write
       contents: write
@@ -22,18 +21,24 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: "Run scripts and package extension"
+    - name: "Prepare code"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
       run: |
         npm run restore
         npm run format
         npm run lint
-        # Install tfx CLI (https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md)
+
+    - name: "Package and publish AzDO extension"
+      working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
+      run: |
+        # -1- Install CLI (https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md)
         npm i -g tfx-cli
-        # Bump version and create VSIX
-        npm run package-version-bump
-      env:
-        NODE_OPTIONS: "--max_old_space_size=4096"
+        # -2- Login
+        npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token ${{secrets.MARKETPLACE_PAT}}
+        # -3- Package the extension (reminder: Do not auto-bump the version here)
+        npx tfx-cli extension create --manifest-globs ./vss-extension.json
+        # -4- Publish to marketplace
+        npx tfx extension publish
 
     - uses: actions/upload-artifact@v4
       name: "Attach Artifact"
@@ -41,11 +46,3 @@ jobs:
         name: lancelotsoftware.akeyless-secrets
         path: "**/*.vsix"
         retention-days: 10
-
-    - name: Publish Extension to AzDO Marketplace
-      uses: HaaLeo/publish-vscode-extension@v1
-      with:
-        pat: ${{secrets.MARKETPLACE_PAT}}
-        registryUrl: 'https://marketplace.visualstudio.com'
-        packagePath: ${{github.workspace}}
-            
