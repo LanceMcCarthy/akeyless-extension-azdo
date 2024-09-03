@@ -29,7 +29,6 @@ jobs:
         npm run lint
 
     - name: "Package and publish AzDO extension"
-      working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
       run: |
         # -1- Install CLI (https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md)
         npm i -g tfx-cli
