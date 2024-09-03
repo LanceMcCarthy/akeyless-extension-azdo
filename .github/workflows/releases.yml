@@ -23,13 +23,15 @@ jobs:
         fetch-depth: 0
 
     - name: "Run scripts and package extension"
-      working-directory: '${{ github.workspace }}\tasks\akeyless-secrets'
+      working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
       run: |
         npm run restore
         npm run format
         npm run lint
-        npm i -g tfx-cli    # tfx CLI docs https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md
-        npm run package     # Create VSIX
+        # Install tfx CLI (https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md)
+        npm i -g tfx-cli
+        # Bump version and create VSIX
+        npm run package-version-bump
       env:
         NODE_OPTIONS: "--max_old_space_size=4096"
 
@@ -38,4 +40,12 @@ jobs:
       with:
         name: lancelotsoftware.akeyless-secrets
         path: "**/*.vsix"
-        retention-days: 30
+        retention-days: 10
+
+    - name: Publish Extension to AzDO Marketplace
+      uses: HaaLeo/publish-vscode-extension@v1
+      with:
+        pat: ${{secrets.MARKETPLACE_PAT}}
+        registryUrl: 'https://marketplace.visualstudio.com'
+        packagePath: ${{github.workspace}}
+            
