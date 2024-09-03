@@ -1,4 +1,4 @@
-name: 'Prepare Releases'
+name: 'Publish Release'
 
 on:
   workflow_dispatch:
