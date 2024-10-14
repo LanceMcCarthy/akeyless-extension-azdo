@@ -23,7 +23,7 @@
   "author": "Lance McCarthy",
   "license": "ISC",
   "dependencies": {
-    "akeyless": "^4.2.3",
+    "akeyless": "^4.2.5",
     "azure-pipelines-task-lib": "^4.17.2"
   },
   "devDependencies": {
