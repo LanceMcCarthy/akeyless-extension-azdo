@@ -27,7 +27,7 @@
     "azure-pipelines-task-lib": "^4.17.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.0",
+    "@eslint/js": "^9.16.0",
     "eslint": "^9.15.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.12.0",
