@@ -6,7 +6,13 @@ export default [
   {
     files: ["**/*.js"], 
     languageOptions: {sourceType: "commonjs"},
-    ignores: ["node_modules/",  ".vscode/", "package.json", "package-lock.json", "task.json", "vss-extension.json" ],
+    ignores: [
+      "node_modules/",
+      ".vscode/",
+      "package.json",
+      "package-lock.json",
+      "task.json",
+      "vss-extension.json" ],
     rules: {
         "eslint-comments/no-use": "off",
         "no-undef": "off",
