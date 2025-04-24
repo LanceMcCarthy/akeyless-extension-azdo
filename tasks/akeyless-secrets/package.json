@@ -23,14 +23,14 @@
   "author": "Lance McCarthy",
   "license": "ISC",
   "dependencies": {
-    "akeyless": "^5.0.0",
+    "akeyless": "^5.0.3",
     "azure-pipelines-task-lib": "^5.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
-    "eslint": "^9.25.0",
-    "eslint-plugin-prettier": "^5.2.1",
+    "eslint": "^9.25.1",
+    "eslint-plugin-prettier": "^5.2.6",
     "globals": "^16.0.0",
-    "prettier": "^3.5.0"
+    "prettier": "^3.5.3"
   }
 }
