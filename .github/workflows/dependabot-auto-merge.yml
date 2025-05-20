@@ -30,8 +30,9 @@ jobs:
           allowed-conclusions: success
       
       # Skip major version updates as they might contain breaking changes
+      # Skip akeyless updates as they will require manual
       - name: Auto-merge non-major updates
-        if: ${{ steps.metadata.outputs.update-type != 'version-update:semver-major' }}
+        if: ${{ steps.metadata.outputs.update-type != 'version-update:semver-major' && !contains(steps.metadata.outputs.dependency-names, 'akeyless') }}
         run: |
           gh pr review --approve "$PR_URL"
           gh pr merge --auto --squash "$PR_URL"
