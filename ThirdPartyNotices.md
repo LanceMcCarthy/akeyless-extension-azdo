@@ -4,8 +4,8 @@ Microsoft received such third party material are set forth below.  Microsoft
 reserves all other rights not expressly granted, whether by implication, 
 estoppel or otherwise.
 
-1. akeyless (5.3.0) - https://github.com/akeylesslabs/akeyless-javascript
-2. azure-pipelines-task-lib (5.2.0) - https://www.npmjs.com/package/shelljs
+1. akeyless (3.6.3) - https://github.com/akeylesslabs/akeyless-javascript
+2. azure-pipelines-task-lib (4.11.0) - https://www.npmjs.com/package/shelljs
 
 
 *** akeyless ***

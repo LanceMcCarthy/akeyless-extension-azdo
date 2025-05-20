@@ -50,12 +50,10 @@ async function run() {
     console.log('Received a token from akeyless, fetching secrets...');
   } catch (error) {
     SDK.setResult(SDK.TaskResult.Failed, `Failed to authenticate with Akeyless, please verify you have set up your Auth Method and/or Access Role properly. \r\nError: ${error}.`);
-    return;
   }
 
   if (akeylessToken === undefined) {
     SDK.setResult(SDK.TaskResult.Failed, `Unexpected failure, cannot continue. The akeyless token is empty even though you're authenticated, please double check the inputs or open an issue at https://github.com/LanceMcCarthy/akeyless-extension-azdo.`);
-    return;
   }
 
   // *********************************************** //
@@ -63,73 +61,74 @@ async function run() {
   // *********************************************** //
 
   // ************ static secrets *************** //
+
   if (staticSecrets) {
-    await processSecrets(api, akeylessToken, staticSecrets, 'Static Secrets');
+    console.log(`[Static Secrets] Fetching static secrets...`);
+
+    //Parse input
+    const staticSecretsDictionary = JSON.parse(staticSecrets);
+
+    if (staticSecretsDictionary === undefined) {
+      SDK.setResult(SDK.TaskResult.Failed, `Something went wrong during input deserialization of staticSecrets. Check the JSON string is in the expected format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
+    }
+
+    // GET SECRETS
+    for (const akeylessPath of Object.keys(staticSecretsDictionary)) {
+      // Get the name to be used for the output variable
+      let variableName = staticSecretsDictionary[akeylessPath];
+
+      // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
+      console.log(`Requesting '${akeylessPath}' from akeyless...`);
+
+      // Prepare request args and fetch secret
+      const statOpts = akeyless.GetSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
+
+      // prettier-ignore
+      api.getSecretValue(statOpts).then(secretResult => {
+        success(akeylessPath, variableName, secretResult[akeylessPath]);
+      })
+      .catch(error => {
+        fail(akeylessPath, JSON.stringify(error));
+      });
+    }
   } else {
     console.log(`[Static Secrets] Skipped, no static secrets were requested.`);
   }
 
   // ********** dynamic secrets *************** //
+
   if (dynamicSecrets) {
-    await processSecrets(api, akeylessToken, dynamicSecrets, 'Dynamic Secrets');
+    console.log(`[Dynamic Secrets] Fetching dynamic secrets...`);
+
+    // Parse input
+    let secretsDictionary = (secretsDictionary = JSON.parse(dynamicSecrets));
+
+    if (secretsDictionary === undefined) {
+      SDK.setResult(SDK.TaskResult.Failed, `Something went wrong during input deserialization of dynamicSecrets. Check the JSON string is in the expected format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
+    }
+
+    // GET SECRETS
+    for (const akeylessPath of Object.keys(secretsDictionary)) {
+      // Get user's desired name for the variable
+      let variableName = secretsDictionary[akeylessPath];
+
+      // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
+      console.log(`Requesting '${akeylessPath}' from akeyless...`);
+
+      // Prepare request args and fetch the secret
+      const dynOpts = akeyless.GetSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
+
+      // prettier-ignore
+      api.getSecretValue(dynOpts).then(secretResult => {
+        success(akeylessPath, variableName, secretResult[akeylessPath]);
+      })
+      .catch(error => {
+        fail(akeylessPath, JSON.stringify(error));
+      });
+    }
   } else {
     console.log(`[Dynamic Secrets] Skipped, no dynamic secrets were requested.`);
   }
-}
-
-/**
- * Process secrets from Akeyless
- * @param {object} api - Akeyless API client
- * @param {string} token - Akeyless authentication token
- * @param {string} secretsJson - JSON string of secrets to fetch
- * @param {string} secretType - Type of secrets (Static or Dynamic)
- * @returns {Promise<void>}
- */
-async function processSecrets(api, token, secretsJson, secretType) {
-  console.log(`[${secretType}] Fetching ${secretType.toLowerCase()}...`);
-
-  //Parse input
-  let secretsDictionary;
-  try {
-    secretsDictionary = JSON.parse(secretsJson);
-    
-    if (secretsDictionary === undefined) {
-      SDK.setResult(SDK.TaskResult.Failed, `Something went wrong during input deserialization of ${secretType.toLowerCase()}. Check the JSON string is in the expected format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
-      return;
-    }
-  } catch (error) {
-    SDK.setResult(SDK.TaskResult.Failed, `Failed to parse ${secretType.toLowerCase()} JSON: ${error.message}. Check the JSON string is in the expected format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
-    return;
-  }
-
-  // Array to hold all promises
-  const promises = [];
-
-  // GET SECRETS
-  for (const akeylessPath of Object.keys(secretsDictionary)) {
-    // Get the name to be used for the output variable
-    let variableName = secretsDictionary[akeylessPath];
-
-    // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
-    console.log(`Requesting '${akeylessPath}' from akeyless...`);
-
-    // Prepare request args and fetch secret
-    const opts = akeyless.GetSecretValue.constructFromObject({token: token, names: [akeylessPath]});
-
-    // Add promise to array
-    promises.push(
-      api.getSecretValue(opts)
-        .then(secretResult => {
-          success(akeylessPath, variableName, secretResult[akeylessPath]);
-        })
-        .catch(error => {
-          fail(akeylessPath, JSON.stringify(error));
-        })
-    );
-  }
-
-  // Wait for all promises to resolve
-  await Promise.all(promises);
 }
 
 function success(path, outputName, value) {
@@ -139,7 +138,7 @@ function success(path, outputName, value) {
 }
 
 function fail(path, errorText) {
-  // Fail if there was trouble getting any expected secret
+  // Fail if there was troubvle getting any expected secret
   SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${path}'. Error: ${errorText}.`);
 }
 
