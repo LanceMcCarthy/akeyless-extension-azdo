@@ -2,11 +2,15 @@
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
-- [Getting Started](#getting-started)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
-- [Static Secrets](#static-secrets)
-- [Dynamic Secrets](#dynamic-secrets)
+- [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
+  - [Getting Started](#getting-started)
+  - [Inputs](#inputs)
+  - [Outputs](#outputs)
+    - [YAML Pipelines](#yaml-pipelines)
+    - [Classic Pipelines](#classic-pipelines)
+    - [Accessing the Output](#accessing-the-output)
+  - [Static Secrets](#static-secrets)
+  - [Dynamic Secrets](#dynamic-secrets)
 
 ## Getting Started
 
@@ -44,7 +48,7 @@ When writing the task in YAML, you set the reference name using the `name` prope
 ```yml
 - task: akeyless-secrets@1
   name: 'MyAkeylessTask'
-  displayName: 'this is only for display purposes'
+  displayName: 'Only the task's Display Name'
 ```
 
 ### Classic Pipelines
