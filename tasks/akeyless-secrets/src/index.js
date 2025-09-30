@@ -101,7 +101,7 @@ async function run() {
     console.log(`[Dynamic Secrets] Fetching dynamic secrets...`);
 
     // Parse input
-    let secretsDictionary = (secretsDictionary = JSON.parse(dynamicSecrets));
+    let secretsDictionary = JSON.parse(dynamicSecrets);
 
     if (secretsDictionary === undefined) {
       SDK.setResult(SDK.TaskResult.Failed, `Something went wrong during input deserialization of dynamicSecrets. Check the JSON string is in the expected format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
