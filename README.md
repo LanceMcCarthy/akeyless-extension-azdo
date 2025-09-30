@@ -118,7 +118,7 @@ steps:
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
-    staticSecrets: '{"/path/to/dynamic/secret":"my_dynamic_secret"}'
+    dynamicSecrets: '{"/path/to/dynamic/secret":"my_dynamic_secret"}'
 ```
 
 You will have `$(MyAkeylessTask.my_dynamic_secret)` available in subsequent tasks of that job. Note that dynamic secrets tend to be complex objects and you will likely need to further process the value to get an inner value.
