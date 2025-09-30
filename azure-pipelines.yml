@@ -38,14 +38,36 @@ jobs:
 
     # Test dynamic secrets retrieval
     - task: akeyless-secrets@1
-      name: 'AkeylessDynamic'
-      displayName: 'Get Dynamic Secret'
+      name: 'AkeylessSqlDynamic'
+      displayName: 'Get SQL Dynamic Secret'
       inputs:
         accessid: 'p-sxfgaph9urt4om'
         azureJwt: '$(AzureCLI.azure_jwt)'
-        dynamicSecrets: '{"/entra-id-dvlup":"entra_dynamic_secret"}'
+        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
 
     - powershell: |
-        echo '$(AkeylessDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("AKEYLESS_ENTRA_ID_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
-        echo $ENTRA
-      displayName: 'Check Dynamic Secret output'
+        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)' | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
+        echo $SQL.id
+        echo $SQL.user
+        echo $SQL.ttl_in_minutes
+        # $SQL.password
+      displayName: 'Check SQL Dynamic Secret output'
+
+    - task: akeyless-secrets@1
+      name: 'AkeylessEntraDynamic'
+      displayName: 'Get Entra Dynamic Secret'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
+
+    - powershell: |
+        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("AKEYLESS_ENTRA_ID_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
+        echo $ENTRA.keyId
+        echo $ENTRA.displayName
+        echo $ENTRA.appId
+        echo $ENTRA.tenantId
+        echo $ENTRA.ttl_in_minutes
+        echo $ENTRA.endDateTime
+        # $ENTRA.secretText
+      displayName: 'Check EntraID Dynamic Secret output'
