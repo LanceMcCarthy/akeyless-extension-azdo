@@ -40,7 +40,7 @@ jobs:
       inputs:
         accessid: 'p-sxfgaph9urt4om'
         azureJwt: '$(AzureCLI.azure_jwt)'
-        staticSecrets: '{"/entra-id-lance-live":"entra_dynamic_secret"}'
+        staticSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
 
     - powershell: |
         echo '$(AkeylessDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("AKEYLESS_ENTRA_ID_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
