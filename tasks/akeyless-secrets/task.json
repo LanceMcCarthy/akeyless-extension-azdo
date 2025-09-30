@@ -3,7 +3,7 @@
     "id": "9efcb218-7f01-412c-a7a5-f13101405204",
     "name": "akeyless-secrets",
     "friendlyName": "AKeyless Secrets",
-    "description": "An Azure DevOps extension to safely retrieve secrets from your AKeyless vault and create Pipeline secret variables.",
+    "description": "An Azure DevOps extension to safely retrieve static and dynamic secrets from your AKeyless vault and create Pipeline secret variables.",
     "helpMarkDown": "[Learn more about this task](https://github.com/LanceMcCarthy/akeyless-extension-azdo)",
     "category": "Utility",
     "author": "Lance McCarthy",
@@ -14,7 +14,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 0
+        "Patch": 17
     },
     "instanceNameFormat": "Akeyless Secrets",
     "groups": [
