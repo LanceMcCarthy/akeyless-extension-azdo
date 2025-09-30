@@ -12,6 +12,7 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
+    # Get credentials from Azure DevOps Service Connection to authenticate to Akeyless
     - task: AzureCLI@2
       name: 'AzureCLI'
       displayName: 'Get JWT from Azure Service Principal'
@@ -23,6 +24,7 @@ jobs:
           $JWT=$(az account get-access-token --query accessToken --output tsv)
           echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
     
+    # Test static secrets retrieval
     - task: akeyless-secrets@1
       name: 'AkeylessStatic'
       displayName: 'Get Static Secrets'
@@ -34,6 +36,7 @@ jobs:
     - powershell: echo "Your output secret is $(AkeylessStatic.NUGET_KEY)"
       displayName: 'Check Static Secret output'
 
+    # Test dynamic secrets retrieval
     - task: akeyless-secrets@1
       name: 'AkeylessDynamic'
       displayName: 'Get Dynamic Secret'
