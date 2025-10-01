@@ -12,7 +12,6 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
-    # Get credentials from Azure DevOps Service Connection to authenticate to Akeyless
     - task: AzureCLI@2
       name: 'AzureCLI'
       displayName: 'Get JWT from Azure Service Principal'
@@ -23,32 +22,27 @@ jobs:
         inlineScript: |
           $JWT=$(az account get-access-token --query accessToken --output tsv)
           echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
-    
+
     - task: akeyless-auth@0
-      name: AkeylessAuth
-      inputs:
-        connectedServiceName: 'PersonalAkeylessVault'
-        jwt: "$(AzureCLI.azure_jwt)"
-
-    - task: akeyless-get-secrets-value@0
       name: AkeylessStatic
-      displayName: 'Fetch Static Secrets'
       inputs:
         connectedServiceName: 'PersonalAkeylessVault'
-        token: "$(AkeylessAuth.akeylessToken)"
-        secretsPaths: 'NUGET_KEY=/progress/TELERIK_NUGET_KEY,model_id=/ai/agent/model-id'
+        jwt: '$(AzureCLI.azure_jwt)'
 
+    - task: akeyless-get-secrets-value-task@0
+      inputs:
+        connectedServiceName: 'PersonalAkeylessVault'
+        token: '$(AkeylessAuth.akeylessToken)'
+        secretsPaths: 'nuget_key=/progress/TELERIK_NUGET_KEY,test_secret=/samples/azdo-test-secret'
 
     - powershell: echo "Your output secret is $(NUGET_KEY)"
       displayName: 'Check Static Secret output'
 
-    - task: akeyless-get-dynamic-secret-value@0
-      name: AkeylessSqlDynamic
-      displayName: 'Fetch Dynamic Secret'
+    - task: akeyless-get-dynamic-secret-value-task@0
       inputs:
         connectedServiceName: 'PersonalAkeylessVault'
-        token: "$(AkeylessAuth.akeylessToken)"
         name: '/az-dvlup-sqlsrvsecret'
+        token: '$(AkeylessAuth.akeylessToken)'
         timeout: 30
 
     - powershell: |
