@@ -27,14 +27,14 @@ jobs:
     - task: akeyless-auth@0
       name: AkeylessAuth
       inputs:
-        connectedServiceName: 'Demo_Service_Principal'
+        connectedServiceName: 'PersonalAkeylessVault'
         jwt: "$(AzureCLI.azure_jwt)"
 
     - task: akeyless-get-secrets-value@0
       name: AkeylessStatic
       displayName: 'Fetch Static Secrets'
       inputs:
-        connectedServiceName: 'Demo_Service_Principal'
+        connectedServiceName: 'PersonalAkeylessVault'
         token: "$(AkeylessAuth.akeylessToken)"
         secretsPaths: 'NUGET_KEY=/progress/TELERIK_NUGET_KEY,model_id=/ai/agent/model-id'
 
@@ -46,7 +46,7 @@ jobs:
       name: AkeylessSqlDynamic
       displayName: 'Fetch Dynamic Secret'
       inputs:
-        connectedServiceName: 'Demo_Service_Principal'
+        connectedServiceName: 'PersonalAkeylessVault'
         token: "$(AkeylessAuth.akeylessToken)"
         name: '/az-dvlup-sqlsrvsecret'
         timeout: 30
@@ -76,31 +76,31 @@ jobs:
     #     staticSecrets: '{"/progress/TELERIK_NUGET_KEY":"NUGET_KEY"}'
 
     # Test dynamic secrets retrieval
-    - task: akeyless-secrets@1
-      name: 'AkeylessSqlDynamic'
-      displayName: 'Get SQL Dynamic Secret'
-      inputs:
-        accessid: 'p-sxfgaph9urt4om'
-        azureJwt: '$(AzureCLI.azure_jwt)'
-        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
+    # - task: akeyless-secrets@1
+    #   name: 'AkeylessSqlDynamic'
+    #   displayName: 'Get SQL Dynamic Secret'
+    #   inputs:
+    #     accessid: 'p-sxfgaph9urt4om'
+    #     azureJwt: '$(AzureCLI.azure_jwt)'
+    #     dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
 
-    - powershell: |
-        # SQL example
-        # "{\"user\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\",\"password\":\"ABC~3eF=12345r3\",\"ttl_in_minutes\":\"60\",\"id\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\"}"
+    # - powershell: |
+    #     # SQL example
+    #     # "{\"user\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\",\"password\":\"ABC~3eF=12345r3\",\"ttl_in_minutes\":\"60\",\"id\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\"}"
 
-        Write-Host "User: $(AkeylessSqlDynamic.sql_dynamic_secret)"
+    #     Write-Host "User: $(AkeylessSqlDynamic.sql_dynamic_secret)"
 
-        $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
-        $user = $jsonObject.user
-        $password = $jsonObject.password
-        $ttl = $jsonObject.ttl_in_minute
-        $id = $jsonObject.id
+    #     $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
+    #     $user = $jsonObject.user
+    #     $password = $jsonObject.password
+    #     $ttl = $jsonObject.ttl_in_minute
+    #     $id = $jsonObject.id
         
-        Write-Host "User: $user"
-        Write-Host "Password: $password"
-        Write-Host "TTL: $ttl
-        Write-Host "Id: $id"
-      displayName: 'Check SQL Dynamic Secret output'
+    #     Write-Host "User: $user"
+    #     Write-Host "Password: $password"
+    #     Write-Host "TTL: $ttl
+    #     Write-Host "Id: $id"
+    #   displayName: 'Check SQL Dynamic Secret output'
 
     # - task: akeyless-secrets@1
     #   name: 'AkeylessEntraDynamic'
