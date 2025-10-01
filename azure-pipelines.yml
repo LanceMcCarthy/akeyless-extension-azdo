@@ -49,7 +49,9 @@ jobs:
         # SQL example
         # "{\"user\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\",\"password\":\"ABC~3eF=12345r3\",\"ttl_in_minutes\":\"60\",\"id\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\"}"
 
-        $jsonObject = $(AkeylessSqlDynamic.sql_dynamic_secret) | ConvertFrom-Json
+        Write-Host "User: $(AkeylessSqlDynamic.sql_dynamic_secret)"
+
+        $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
         $user = $jsonObject.user
         $password = $jsonObject.password
         $ttl = $jsonObject.ttl_in_minute
@@ -73,7 +75,9 @@ jobs:
         # Entra ID Response Example
         # "{\"secret\":{\"keyId\":\"eff4031b-8b5c-4da6-b76f-05e70790d326\",\"displayName\":\"tmp.lancedvlupcom.LzlSh\",\"secretText\":\"ABCDEFG~BW1WQNBfaQoSeWmjfSxqm123456awM\",\"appId\":\"207ff3fc-f6e3-442e-babf-55b62e047be7\",\"tenantId\":\"bd47e796-3473-4b8a-9101-1f4c0c7af31a\",\"endDateTime\":\"2025-10-01T22:44:08.5970399Z\"},\"ttl_in_minutes\":\"60\",\"id\":\"{\\\"secret_name\\\":\\\"tmp.lancedvlupcom.LzlSh\\\",\\\"secret_key_id\\\":\\\"eff4031b-8b5c-4da6-b76f-05e70790d326\\\"}\",\"msg\":\"User  has been added successfully to the following\\nGroup(s): []\\nRole(s): []\\nExpires on Tue Sep 30 23:44:09 UTC 2025\"}"
 
-        $jsonObject = $(AkeylessEntraDynamic.entra_dynamic_secret) | ConvertFrom-Json
+        Write-Host "User: $(AkeylessEntraDynamic.entra_dynamic_secret)"
+
+        $jsonObject = "$(AkeylessEntraDynamic.entra_dynamic_secret)" | ConvertFrom-Json
         $keyId = $jsonObject.secret.keyId
         $displayName = $jsonObject.secret.displayName
         $appId = $jsonObject.secret.appId
