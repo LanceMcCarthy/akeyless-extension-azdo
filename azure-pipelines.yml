@@ -8,81 +8,81 @@ trigger:
      - 'tasks/**/*'
 
 jobs:
-# Job 1
-  - job: Akeyless_Official
-    pool:
-      vmImage: 'windows-latest'
-    steps:
-    # Get JWT from Azure Service Principal so we can use it for the akeyless-auth@0 task
-    - task: AzureCLI@2
-      name: 'AzureCLI'
-      displayName: 'Get JWT from Azure Service Principal'
-      inputs:
-        azureSubscription: 'Azure MSA Account'
-        scriptType: ps
-        scriptLocation: inlineScript
-        inlineScript: |
-          $JWT=$(az account get-access-token --query accessToken --output tsv)
-          echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
+# Job 1 - USes https://marketplace.visualstudio.com/items?itemName=Akeyless-Engineering.akeyless-secrets-management
+  # - job: Akeyless_Official
+  #   pool:
+  #     vmImage: 'windows-latest'
+  #   steps:
+  #   # Get JWT from Azure Service Principal so we can use it for the akeyless-auth@0 task
+  #   - task: AzureCLI@2
+  #     name: 'AzureCLI'
+  #     displayName: 'Get JWT from Azure Service Principal'
+  #     inputs:
+  #       azureSubscription: 'Azure MSA Account'
+  #       scriptType: ps
+  #       scriptLocation: inlineScript
+  #       inlineScript: |
+  #         $JWT=$(az account get-access-token --query accessToken --output tsv)
+  #         echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
-    # Important: The 'connectedServiceName` is a service you've added in your AzDO project settings. It simply holds your Akeyless Access ID (ex. 'p-xxxxxxx').
-    # Once you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets later
-    - task: akeyless-auth@0
-      name: AkeylessAuth
-      displayName: 'Get Akeyless Access Token'
-      inputs:
-        connectedServiceName: 'PersonalAkeylessVault'
-        jwt: '$(AzureCLI.azure_jwt)'
+  #   # Important: The 'connectedServiceName` is a service you've added in your AzDO project settings. It simply holds your Akeyless Access ID (ex. 'p-xxxxxxx').
+  #   # Once you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets later
+  #   - task: akeyless-auth@0
+  #     name: AkeylessAuth
+  #     displayName: 'Get Akeyless Access Token'
+  #     inputs:
+  #       connectedServiceName: 'PersonalAkeylessVault'
+  #       jwt: '$(AzureCLI.azure_jwt)'
 
-    # Static secrets retrieval
+  #   # Static secrets retrieval
 
-    - task: akeyless-get-secrets-value-task@0
-      displayName: 'Get Static Secrets'
-      inputs:
-        connectedServiceName: 'PersonalAkeylessVault'
-        token: '$(AkeylessAuth.akeylessToken)'
-        secretsPaths: 'nuget_key=/progress/TELERIK_NUGET_KEY,my_cool_secret=/samples/azdo-test-secret'
+  #   - task: akeyless-get-secrets-value-task@0
+  #     displayName: 'Get Static Secrets'
+  #     inputs:
+  #       connectedServiceName: 'PersonalAkeylessVault'
+  #       token: '$(AkeylessAuth.akeylessToken)'
+  #       secretsPaths: 'nuget_key=/progress/TELERIK_NUGET_KEY,my_cool_secret=/samples/azdo-test-secret'
 
-    - powershell: |
-        echo "---------------------------------------------"
-        echo "Static secrets can simply be referenced by the"
-        echo "output variable name you set in the task input."
-        echo "---------------------------------------------"
+  #   - powershell: |
+  #       echo "---------------------------------------------"
+  #       echo "Static secrets can simply be referenced by the"
+  #       echo "output variable name you set in the task input."
+  #       echo "---------------------------------------------"
         
-        echo "Verifying static secrets..."
-        echo "nuget_key: $(nuget_key)"
-        echo "my_cool_secret: $(my_cool_secret)"
-      displayName: 'Checking static Secrets'
+  #       echo "Verifying static secrets..."
+  #       echo "nuget_key: $(nuget_key)"
+  #       echo "my_cool_secret: $(my_cool_secret)"
+  #     displayName: 'Checking static Secrets'
 
-    # Dynamic secrets retrieval
+  #   # Dynamic secrets retrieval
 
-    - task: akeyless-get-dynamic-secret-value-task@0
-      name: AkeylessSqlDynamic
-      displayName: 'Get SQL Dynamic Secret'
-      inputs:
-        connectedServiceName: 'PersonalAkeylessVault'
-        token: '$(AkeylessAuth.akeylessToken)'
-        name: '/az-dvlup-sqlsrvsecret'
-        timeout: 30
+  #   - task: akeyless-get-dynamic-secret-value-task@0
+  #     name: AkeylessSqlDynamic
+  #     displayName: 'Get SQL Dynamic Secret'
+  #     inputs:
+  #       connectedServiceName: 'PersonalAkeylessVault'
+  #       token: '$(AkeylessAuth.akeylessToken)'
+  #       name: '/az-dvlup-sqlsrvsecret'
+  #       timeout: 30
 
-    - powershell: |
-        echo "Verifying SQL dynamic secret..."
-        echo "$(AkeylessSqlDynamic.dynamicSecretValue)"
-      displayName: 'Checking Secrets'
+  #   - powershell: |
+  #       echo "Verifying SQL dynamic secret..."
+  #       echo "$(AkeylessSqlDynamic.dynamicSecretValue)"
+  #     displayName: 'Checking Secrets'
 
-    - task: akeyless-get-dynamic-secret-value-task@0
-      name: AkeylessEntraDynamic
-      displayName: 'Get Entra ID Dynamic Secret'
-      inputs:
-        connectedServiceName: 'PersonalAkeylessVault'
-        token: '$(AkeylessAuth.akeylessToken)'
-        name: '/az-dvlup-sqlsrvsecret'
-        timeout: 30
+  #   - task: akeyless-get-dynamic-secret-value-task@0
+  #     name: AkeylessEntraDynamic
+  #     displayName: 'Get Entra ID Dynamic Secret'
+  #     inputs:
+  #       connectedServiceName: 'PersonalAkeylessVault'
+  #       token: '$(AkeylessAuth.akeylessToken)'
+  #       name: '/az-dvlup-sqlsrvsecret'
+  #       timeout: 30
 
-    - powershell: |
-        echo "Verifying Entra Id dynamic secret..."
-        echo "$(AkeylessEntraDynamic.dynamicSecretValue)"
-      displayName: 'Checking Secrets'
+  #   - powershell: |
+  #       echo "Verifying Entra Id dynamic secret..."
+  #       echo "$(AkeylessEntraDynamic.dynamicSecretValue)"
+  #     displayName: 'Checking Secrets'
 
 # JOB 2
   - job: Akeyless_Custom

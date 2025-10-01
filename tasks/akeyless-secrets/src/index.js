@@ -119,7 +119,7 @@ async function run() {
       const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
 
       // prettier-ignore
-      api.getSecretValue(dynOpts).then(secretResult => {
+      api.getDynamicSecretValue(dynOpts).then(secretResult => {
         success(akeylessPath, variableName, secretResult[akeylessPath]);
       })
       .catch(error => {
