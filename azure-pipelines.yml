@@ -46,12 +46,10 @@ jobs:
         dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
 
     - powershell: |
-        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)'
-        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)' | jq -r 'to_entries|map("(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
-        echo $SQL.id
-        echo $SQL.user
-        echo $SQL.ttl_in_minutes
-        # $SQL.password
+        $username=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.user')
+        $password=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.password')
+        $ttl=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.ttl_in_minutes')
+        $id=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.id')
       displayName: 'Check SQL Dynamic Secret output'
 
     - task: akeyless-secrets@1
@@ -63,13 +61,11 @@ jobs:
         dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
 
     - powershell: |
-        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)'
-        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
-        echo $ENTRA.keyId
-        echo $ENTRA.displayName
-        echo $ENTRA.appId
-        echo $ENTRA.tenantId
-        echo $ENTRA.ttl_in_minutes
-        echo $ENTRA.endDateTime
-        # $ENTRA.secretText
+        $keyId=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.keyId')
+        $displayName=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.displayName')
+        $appId=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.appId')
+        $tenantId=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.tenantId')
+        $secretText=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.secretText')
+        $ttl=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.ttl_in_minutes')
+        $endDateTime=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.endDateTime')
       displayName: 'Check EntraID Dynamic Secret output'
