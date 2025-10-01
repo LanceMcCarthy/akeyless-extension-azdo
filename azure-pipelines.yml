@@ -46,7 +46,8 @@ jobs:
         dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
 
     - powershell: |
-        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)' | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
+        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)'
+        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)' | jq -r 'to_entries|map("(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
         echo $SQL.id
         echo $SQL.user
         echo $SQL.ttl_in_minutes
@@ -62,7 +63,8 @@ jobs:
         dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
 
     - powershell: |
-        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("AKEYLESS_ENTRA_ID_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
+        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)'
+        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
         echo $ENTRA.keyId
         echo $ENTRA.displayName
         echo $ENTRA.appId
