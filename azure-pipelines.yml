@@ -8,7 +8,7 @@ trigger:
      - 'tasks/**/*'
 
 jobs:
-  - job: Secrets_Check
+  - job: Akeyless_Official
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -24,8 +24,8 @@ jobs:
           $JWT=$(az account get-access-token --query accessToken --output tsv)
           echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
-# Important: The 'connectedServiceName` is a service you've added in your AzDO project settings. It simply holds your Akeyless Access ID (ex. 'p-xxxxxxx').
-# Once you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets later
+    # Important: The 'connectedServiceName` is a service you've added in your AzDO project settings. It simply holds your Akeyless Access ID (ex. 'p-xxxxxxx').
+    # Once you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets later
     - task: akeyless-auth@0
       name: AkeylessAuth
       displayName: 'Get Akeyless Access Token'
@@ -33,7 +33,7 @@ jobs:
         connectedServiceName: 'PersonalAkeylessVault'
         jwt: '$(AzureCLI.azure_jwt)'
 
-# Static secrets retrieval
+    # Static secrets retrieval
 
     - task: akeyless-get-secrets-value-task@0
       displayName: 'Get Static Secrets'
@@ -53,7 +53,7 @@ jobs:
         echo "my_cool_secret: $(my_cool_secret)"
       displayName: 'Checking static Secrets'
 
-# Dynamic secrets retrieval
+    # Dynamic secrets retrieval
 
     - task: akeyless-get-dynamic-secret-value-task@0
       name: AkeylessSqlDynamic
@@ -83,64 +83,53 @@ jobs:
         echo "$(AkeylessEntraDynamic.dynamicSecretValue)"
       displayName: 'Checking Secrets'
 
+  - job: Akeyless_Custom
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: akeyless-secrets@1
+      name: 'AkeylessStatic'
+      displayName: 'Get Static Secrets'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        staticSecrets: '{"/progress/TELERIK_NUGET_KEY":"NUGET_KEY"}'
 
-# Original
-    # Test static secrets retrieval
-    # - task: akeyless-secrets@1
-    #   name: 'AkeylessStatic'
-    #   displayName: 'Get Static Secrets'
-    #   inputs:
-    #     accessid: 'p-sxfgaph9urt4om'
-    #     azureJwt: '$(AzureCLI.azure_jwt)'
-    #     staticSecrets: '{"/progress/TELERIK_NUGET_KEY":"NUGET_KEY"}'
+    - task: akeyless-secrets@1
+      name: 'AkeylessSqlDynamic'
+      displayName: 'Get SQL Dynamic Secret'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
 
-    # Test dynamic secrets retrieval
-    # - task: akeyless-secrets@1
-    #   name: 'AkeylessSqlDynamic'
-    #   displayName: 'Get SQL Dynamic Secret'
-    #   inputs:
-    #     accessid: 'p-sxfgaph9urt4om'
-    #     azureJwt: '$(AzureCLI.azure_jwt)'
-    #     dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
+    - powershell: |
+        Write-Host "Result: $(AkeylessSqlDynamic.sql_dynamic_secret)"
 
-    # - powershell: |
-    #     # SQL example
-    #     # "{\"user\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\",\"password\":\"ABC~3eF=12345r3\",\"ttl_in_minutes\":\"60\",\"id\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\"}"
+        # $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
+        # Write-Host "User: $jsonObject.user"
+        # Write-Host "Password: $jsonObject.password"
+        # Write-Host "TTL: $jsonObject.ttl_in_minute"
+        # Write-Host "Id: $jsonObject.id"
+      displayName: 'Check SQL Dynamic Secret output'
 
-    #     Write-Host "User: $(AkeylessSqlDynamic.sql_dynamic_secret)"
+    - task: akeyless-secrets@1
+      name: 'AkeylessEntraDynamic'
+      displayName: 'Get Entra Dynamic Secret'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
 
-    #     $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
-    #     $user = $jsonObject.user
-    #     $password = $jsonObject.password
-    #     $ttl = $jsonObject.ttl_in_minute
-    #     $id = $jsonObject.id
-        
-    #     Write-Host "User: $user"
-    #     Write-Host "Password: $password"
-    #     Write-Host "TTL: $ttl
-    #     Write-Host "Id: $id"
-    #   displayName: 'Check SQL Dynamic Secret output'
+    - powershell: |
+        Write-Host "Result: $(AkeylessEntraDynamic.entra_dynamic_secret)"
 
-    # - task: akeyless-secrets@1
-    #   name: 'AkeylessEntraDynamic'
-    #   displayName: 'Get Entra Dynamic Secret'
-    #   inputs:
-    #     accessid: 'p-sxfgaph9urt4om'
-    #     azureJwt: '$(AzureCLI.azure_jwt)'
-    #     dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
-
-    # - powershell: |
-    #     # Entra ID Response Example
-    #     # "{\"secret\":{\"keyId\":\"eff4031b-8b5c-4da6-b76f-05e70790d326\",\"displayName\":\"tmp.lancedvlupcom.LzlSh\",\"secretText\":\"ABCDEFG~BW1WQNBfaQoSeWmjfSxqm123456awM\",\"appId\":\"207ff3fc-f6e3-442e-babf-55b62e047be7\",\"tenantId\":\"bd47e796-3473-4b8a-9101-1f4c0c7af31a\",\"endDateTime\":\"2025-10-01T22:44:08.5970399Z\"},\"ttl_in_minutes\":\"60\",\"id\":\"{\\\"secret_name\\\":\\\"tmp.lancedvlupcom.LzlSh\\\",\\\"secret_key_id\\\":\\\"eff4031b-8b5c-4da6-b76f-05e70790d326\\\"}\",\"msg\":\"User  has been added successfully to the following\\nGroup(s): []\\nRole(s): []\\nExpires on Tue Sep 30 23:44:09 UTC 2025\"}"
-
-    #     Write-Host "User: $(AkeylessEntraDynamic.entra_dynamic_secret)"
-
-    #     $jsonObject = "$(AkeylessEntraDynamic.entra_dynamic_secret)" | ConvertFrom-Json
-    #     $keyId = $jsonObject.secret.keyId
-    #     $displayName = $jsonObject.secret.displayName
-    #     $appId = $jsonObject.secret.appId
-    #     $tenantId = $jsonObject.secret.tenantId
-    #     $secretText = $jsonObject.secret.secretText
-    #     $endDateTime = $jsonObject.secret.endDateTime
-    #     Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
-    #   displayName: 'Check EntraID Dynamic Secret output'
+        # $jsonObject = "$(AkeylessEntraDynamic.entra_dynamic_secret)" | ConvertFrom-Json
+        # $keyId = $jsonObject.secret.keyId
+        # $displayName = $jsonObject.secret.displayName
+        # $appId = $jsonObject.secret.appId
+        # $tenantId = $jsonObject.secret.tenantId
+        # $secretText = $jsonObject.secret.secretText
+        # $endDateTime = $jsonObject.secret.endDateTime
+        # Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
+      displayName: 'Check EntraID Dynamic Secret output'
