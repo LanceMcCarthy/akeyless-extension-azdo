@@ -46,10 +46,15 @@ jobs:
         dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
 
     - powershell: |
+        # SQL example
+        # "{\"user\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\",\"password\":\"ABC~3eF=12345r3\",\"ttl_in_minutes\":\"60\",\"id\":\"tmp_az-dvlup-sqlsr_lancedvlup_com_123AB\"}"
+
         $username=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.user')
         $password=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.password')
         $ttl=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.ttl_in_minutes')
         $id=$(echo "$(AkeylessSqlDynamic.sql_dynamic_secret)" | jq -r '.id')
+
+        Write-Output "Username: $username, Password: $password, TTL (minutes): $ttl, Id: $id"
       displayName: 'Check SQL Dynamic Secret output'
 
     - task: akeyless-secrets@1
@@ -61,6 +66,9 @@ jobs:
         dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
 
     - powershell: |
+        # Entra ID Response Example
+        # "{\"secret\":{\"keyId\":\"eff4031b-8b5c-4da6-b76f-05e70790d326\",\"displayName\":\"tmp.lancedvlupcom.LzlSh\",\"secretText\":\"ABCDEFG~BW1WQNBfaQoSeWmjfSxqm123456awM\",\"appId\":\"207ff3fc-f6e3-442e-babf-55b62e047be7\",\"tenantId\":\"bd47e796-3473-4b8a-9101-1f4c0c7af31a\",\"endDateTime\":\"2025-10-01T22:44:08.5970399Z\"},\"ttl_in_minutes\":\"60\",\"id\":\"{\\\"secret_name\\\":\\\"tmp.lancedvlupcom.LzlSh\\\",\\\"secret_key_id\\\":\\\"eff4031b-8b5c-4da6-b76f-05e70790d326\\\"}\",\"msg\":\"User  has been added successfully to the following\\nGroup(s): []\\nRole(s): []\\nExpires on Tue Sep 30 23:44:09 UTC 2025\"}"
+        
         $keyId=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.keyId')
         $displayName=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.displayName')
         $appId=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.appId')
@@ -68,4 +76,6 @@ jobs:
         $secretText=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.secretText')
         $ttl=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.ttl_in_minutes')
         $endDateTime=$(echo "$(AkeylessEntraDynamic.entra_dynamic_secret)" | jq -r '.endDateTime')
+
+        Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
       displayName: 'Check EntraID Dynamic Secret output'
