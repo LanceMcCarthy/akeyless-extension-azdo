@@ -8,7 +8,83 @@ trigger:
      - 'tasks/**/*'
 
 jobs:
-  - job: Secrets_Check
+  - job: Unpublished_Secrets_Check
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    # Setup Node.js for building the local extension
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: '18.x'
+    
+    # Install dependencies for the local task
+    - script: |
+        cd tasks/akeyless-secrets
+        npm install
+      displayName: 'Install task dependencies'
+    
+    # Get credentials from Azure DevOps Service Connection to authenticate to Akeyless
+    - task: AzureCLI@2
+      name: 'AzureCLI'
+      displayName: 'Get JWT from Azure Service Principal'
+      inputs:
+        azureSubscription: 'Azure MSA Account'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: |
+          $JWT=$(az account get-access-token --query accessToken --output tsv)
+          echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
+    
+    # Test static secrets retrieval
+    - task: akeyless-secrets@tasks/akeyless-secrets
+      name: 'AkeylessStatic'
+      displayName: 'Get Static Secrets'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        staticSecrets: '{"/progress/TELERIK_NUGET_KEY":"NUGET_KEY"}'
+
+    - powershell: echo "Your output secret is $(AkeylessStatic.NUGET_KEY)"
+      displayName: 'Check Static Secret output'
+
+    # Test dynamic secrets retrieval
+    - task: akeyless-secrets@tasks/akeyless-secrets
+      name: 'AkeylessSqlDynamic'
+      displayName: 'Get SQL Dynamic Secret'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
+
+    - powershell: |
+        echo '$(AkeylessSqlDynamic.sql_dynamic_secret)' | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
+        echo $SQL.id
+        echo $SQL.user
+        echo $SQL.ttl_in_minutes
+        # $SQL.password
+      displayName: 'Check SQL Dynamic Secret output'
+
+    - task: akeyless-secrets@1
+      name: 'AkeylessEntraDynamic'
+      displayName: 'Get Entra Dynamic Secret'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
+
+    - powershell: |
+        echo '$(AkeylessEntraDynamic.entra_dynamic_secret)' | jq -r 'to_entries|map("AKEYLESS_ENTRA_ID_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $ENTRA
+        echo $ENTRA.keyId
+        echo $ENTRA.displayName
+        echo $ENTRA.appId
+        echo $ENTRA.tenantId
+        echo $ENTRA.ttl_in_minutes
+        echo $ENTRA.endDateTime
+        # $ENTRA.secretText
+      displayName: 'Check EntraID Dynamic Secret output'
+
+  - job: Published_Secrets_Check
     pool:
       vmImage: 'windows-latest'
     steps:
