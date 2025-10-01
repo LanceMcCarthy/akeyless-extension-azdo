@@ -25,7 +25,7 @@ jobs:
           echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
 
 # Important: The 'connectedServiceName` is a service you've added in your AzDO project settings. It simply holds your Akeyless Access ID (ex. 'p-xxxxxxx').
-
+# Once you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets later
     - task: akeyless-auth@0
       name: AkeylessAuth
       displayName: 'Get Akeyless Access Token'
@@ -33,7 +33,7 @@ jobs:
         connectedServiceName: 'PersonalAkeylessVault'
         jwt: '$(AzureCLI.azure_jwt)'
 
-# Now that you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets
+# Static secrets retrieval
 
     - task: akeyless-get-secrets-value-task@0
       displayName: 'Get Static Secrets'
@@ -41,6 +41,19 @@ jobs:
         connectedServiceName: 'PersonalAkeylessVault'
         token: '$(AkeylessAuth.akeylessToken)'
         secretsPaths: 'nuget_key=/progress/TELERIK_NUGET_KEY,my_cool_secret=/samples/azdo-test-secret'
+
+    - powershell: |
+        echo "---------------------------------------------"
+        echo "Static secrets can simply be referenced by the"
+        echo "output variable name you set in the task input."
+        echo "---------------------------------------------"
+        
+        echo "Verifying static secrets..."
+        echo "nuget_key: $(nuget_key)"
+        echo "my_cool_secret: $(my_cool_secret)"
+      displayName: 'Checking static Secrets'
+
+# Dynamic secrets retrieval
 
     - task: akeyless-get-dynamic-secret-value-task@0
       name: AkeylessSqlDynamic
@@ -51,6 +64,19 @@ jobs:
         name: '/az-dvlup-sqlsrvsecret'
         timeout: 30
 
+    - powershell: |
+        echo "---------------------------------------------------------------------------------------------"
+        echo "Dynamic secrets need to be parsed from the 'dynamicSecretValue' output variable of the task."
+        echo "---------------------------------------------------------------------------------------------"
+        echo "Verifying SQL dynamic secret..."
+
+        $username=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.user')
+        $password=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.password')
+        $ttl=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.ttl_in_minutes')
+        $id=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.id')
+        echo "SQL CONFIRMATION - User: $username, Password: $password, TTL: $ttl, Id: $id"
+      displayName: 'Checking Secrets'
+
     - task: akeyless-get-dynamic-secret-value-task@0
       name: AkeylessEntraDynamic
       displayName: 'Get Entra ID Dynamic Secret'
@@ -60,37 +86,18 @@ jobs:
         name: '/az-dvlup-sqlsrvsecret'
         timeout: 30
 
-# Verifying Outputs
-
     - powershell: |
-        echo "---------------------------------------------"
-        echo "Static secrets can simply be referenced by the output variable name you set in the task input."
-        echo "---------------------------------------------"
-        
-        echo "Checking static secrets..."
-        echo "nuget_key: $(nuget_key)"
-        echo "my_cool_secret: $(my_cool_secret)"
+        echo "---------------------------------------------------------------------------------------------"
+        echo "Dynamic secrets need to be parsed from the 'dynamicSecretValue' output variable of the task."
+        echo "---------------------------------------------------------------------------------------------"
+        echo "Verifying Entra Id dynamic secret..."
 
-        echo "---------------------------------------------"
-        echo "Dynamic secrets need to be parsed from JSON in the 'dynamicSecretValue' output variable."
-        echo "---------------------------------------------"
-
-        echo "Checking SQL dynamic secrets..."
-
-        $sqlJsonObject = "$(AkeylessSqlDynamic.dynamicSecretValue)" | ConvertFrom-Json
-        echo "User: $sqlJsonObject.user"
-        echo "Password: $sqlJsonObject.password"
-        echo "TTL: $sqlJsonObject.ttl_in_minute"
-        echo "Id: $sqlJsonObject.id"
-        
-        echo "Checking Entra Id dynamic secrets..."
-
-        $jsonObject = "$(AkeylessEntraDynamic.dynamicSecretValue)" | ConvertFrom-Json
-        echo "keyId: $jsonObject.secret.keyId"
-        echo "displayName: $jsonObject.secret.displayName"
-        echo "appId: $jsonObject.secret.appId"
-        echo "tenantId: $jsonObject.secret.tenantId"
-        echo "secretText: $jsonObject.secret.secretText"
+        keyId=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.keyId')
+        displayName=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.displayName')
+        appId=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.appId')
+        tenantId=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.tenantId')
+        secretText=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.secretText')
+        echo "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText"
       displayName: 'Checking Secrets'
 
 
