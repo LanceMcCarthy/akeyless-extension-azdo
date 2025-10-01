@@ -65,16 +65,8 @@ jobs:
         timeout: 30
 
     - powershell: |
-        echo "---------------------------------------------------------------------------------------------"
-        echo "Dynamic secrets need to be parsed from the 'dynamicSecretValue' output variable of the task."
-        echo "---------------------------------------------------------------------------------------------"
         echo "Verifying SQL dynamic secret..."
-
-        $username=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.user')
-        $password=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.password')
-        $ttl=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.ttl_in_minutes')
-        $id=$(echo "$(AkeylessSqlDynamic.dynamicSecretValue)" | jq -r '.id')
-        echo "SQL CONFIRMATION - User: $username, Password: $password, TTL: $ttl, Id: $id"
+        echo "$(AkeylessSqlDynamic.dynamicSecretValue)"
       displayName: 'Checking Secrets'
 
     - task: akeyless-get-dynamic-secret-value-task@0
@@ -87,17 +79,8 @@ jobs:
         timeout: 30
 
     - powershell: |
-        echo "---------------------------------------------------------------------------------------------"
-        echo "Dynamic secrets need to be parsed from the 'dynamicSecretValue' output variable of the task."
-        echo "---------------------------------------------------------------------------------------------"
         echo "Verifying Entra Id dynamic secret..."
-
-        keyId=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.keyId')
-        displayName=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.displayName')
-        appId=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.appId')
-        tenantId=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.tenantId')
-        secretText=$(echo "$(AkeylessEntraDynamic.dynamicSecretValue)" | jq -r '.secretText')
-        echo "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText"
+        echo "$(AkeylessEntraDynamic.dynamicSecretValue)"
       displayName: 'Checking Secrets'
 
 
