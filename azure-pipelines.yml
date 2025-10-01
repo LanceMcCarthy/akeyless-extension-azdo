@@ -8,6 +8,7 @@ trigger:
      - 'tasks/**/*'
 
 jobs:
+# Job 1
   - job: Akeyless_Official
     pool:
       vmImage: 'windows-latest'
@@ -83,10 +84,21 @@ jobs:
         echo "$(AkeylessEntraDynamic.dynamicSecretValue)"
       displayName: 'Checking Secrets'
 
+# JOB 2
   - job: Akeyless_Custom
     pool:
       vmImage: 'windows-latest'
     steps:
+    - task: AzureCLI@2
+      name: 'AzureCLI'
+      displayName: 'Get JWT from Azure Service Principal'
+      inputs:
+        azureSubscription: 'Azure MSA Account'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: |
+          $JWT=$(az account get-access-token --query accessToken --output tsv)
+          echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
     - task: akeyless-secrets@1
       name: 'AkeylessStatic'
       displayName: 'Get Static Secrets'
