@@ -116,7 +116,7 @@ async function run() {
       console.log(`Requesting '${akeylessPath}' from akeyless...`);
 
       // Prepare request args and fetch the secret
-      const dynOpts = akeyless.GetSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
+      const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({token: akeylessToken, names: [akeylessPath]});
 
       // prettier-ignore
       api.getSecretValue(dynOpts).then(secretResult => {
