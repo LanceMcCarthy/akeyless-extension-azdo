@@ -1,89 +1,89 @@
 {
-    "manifestVersion": 1,
-    "id": "akeyless-extensions",
-    "name": "AKeyless Extensions",
-    "version": "1.1.2",
-    "public": true,
-    "publisher": "LancelotSoftware",
-    "targets": [
-        {
-            "id": "Microsoft.VisualStudio.Services"
-        }
-    ],
-    "description": "An Azure DevOps extension to securely retrieve secrets from your AKeyless vault.",
-    "categories": [
-        "Azure Pipelines"
-    ],
-    "galleryFlags": [
-        "Free",
-        "Preview"
-    ],
-    "tags": [
-        "release",
-        "build",
-        "akeyless",
-        "secrets",
-        "variable",
-        "password",
-        "token"
-    ],
-    "content": {
-        "details": {
-            "path": "README.md"
-        },
-        "license": {
-            "path": "LICENSE.md"
-        }
+  "manifestVersion": 1,
+  "id": "akeyless-extensions",
+  "name": "AKeyless Extensions",
+  "version": "1.1.13",
+  "public": true,
+  "publisher": "LancelotSoftware",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "description": "An Azure DevOps extension to securely retrieve secrets from your AKeyless vault.",
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "galleryFlags": [
+    "Free",
+    "Preview"
+  ],
+  "tags": [
+    "release",
+    "build",
+    "akeyless",
+    "secrets",
+    "variable",
+    "password",
+    "token"
+  ],
+  "content": {
+    "details": {
+      "path": "README.md"
     },
-    "links": {
-        "repository": {
-            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
-        },
-        "getstarted": {
-            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/README.md"
-        },
-        "support": {
-            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/issues"
-        }
-    },
-    "icons": {
-        "default": "images/akeyless-unlock-icon.png"
-    },
-    "screenshots": [
-        {
-            "path": "images/screenshot.png"
-        }
-    ],
+    "license": {
+      "path": "LICENSE.md"
+    }
+  },
+  "links": {
     "repository": {
-        "type": "git",
-        "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
+      "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
     },
-    "files": [
-        {
-            "path": "tasks"
-        },
-        {
-            "path": "images",
-            "addressable": true
-        }
-    ],
-    "badges": [
-        {
-            "href": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml",
-            "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml/badge.svg",
-            "description": "CI"
-        }
-    ],
-    "contributions": [
-        {
-            "id": "secrets",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "tasks"
-            }
-        }
-    ]
+    "getstarted": {
+      "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/README.md"
+    },
+    "support": {
+      "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/issues"
+    }
+  },
+  "icons": {
+    "default": "images/akeyless-unlock-icon.png"
+  },
+  "screenshots": [
+    {
+      "path": "images/screenshot.png"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo"
+  },
+  "files": [
+    {
+      "path": "tasks"
+    },
+    {
+      "path": "images",
+      "addressable": true
+    }
+  ],
+  "badges": [
+    {
+      "href": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml",
+      "uri": "https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/ci.yml/badge.svg",
+      "description": "CI"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "secrets",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "tasks"
+      }
+    }
+  ]
 }
