@@ -8,8 +8,9 @@
     "format": "prettier --write **/*.js",
     "lint": "eslint **/*.js",
     "precommit": "npm run restore && npm run format && npm run lint",
+    "bump-task-version": "node -e \"const fs=require('fs');const path='./task.json';const j=JSON.parse(fs.readFileSync(path));let v=j.version;v.Patch++;if(v.Patch>99){v.Patch=0;v.Minor++;}if(v.Minor>99){v.Minor=0;v.Major++;}j.version=v;fs.writeFileSync(path,JSON.stringify(j,null,2));\"",
     "package": "cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json",
-    "package-version-bump": "cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json  --rev-version"
+    "package-version-bump": "npm run bump-task-version && cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json  --rev-version"
   },
   "keywords": [
     "release",
