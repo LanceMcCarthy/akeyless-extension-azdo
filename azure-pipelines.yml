@@ -121,27 +121,27 @@ jobs:
       inputs:
         accessid: 'p-sxfgaph9urt4om'
         azureJwt: '$(AzureCLI.azure_jwt)'
-        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret", "/entra-id-live":"entra_dynamic_secret", "/custom-web-producer":"custom_dynamic_secret"}'
+        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret", "/entra-id-live":"entra_dynamic_secret"}'
         timeout: 30
       displayName: 'Get Dynamic Secrets'
 
     - powershell: |
-        Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
-        Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
-        Write-Host "Result: $(AkeylessDynamic.custom_dynamic_secret)"
+        # Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
+        # Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
+        # Write-Host "Result: $(AkeylessDynamic.custom_dynamic_secret)"
 
-        # $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
-        # Write-Host "User: $jsonObject.user"
-        # Write-Host "Password: $jsonObject.password"
-        # Write-Host "TTL: $jsonObject.ttl_in_minute"
-        # Write-Host "Id: $jsonObject.id"
+        $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
+        Write-Host "User: $jsonObject.user"
+        Write-Host "Password: $jsonObject.password"
+        Write-Host "TTL: $jsonObject.ttl_in_minute"
+        Write-Host "Id: $jsonObject.id"
 
-        # $jsonObject = "$(AkeylessEntraDynamic.entra_dynamic_secret)" | ConvertFrom-Json
-        # $keyId = $jsonObject.secret.keyId
-        # $displayName = $jsonObject.secret.displayName
-        # $appId = $jsonObject.secret.appId
-        # $tenantId = $jsonObject.secret.tenantId
-        # $secretText = $jsonObject.secret.secretText
-        # $endDateTime = $jsonObject.secret.endDateTime
-        # Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
+        $jsonObject = "$(AkeylessEntraDynamic.entra_dynamic_secret)" | ConvertFrom-Json
+        $keyId = $jsonObject.secret.keyId
+        $displayName = $jsonObject.secret.displayName
+        $appId = $jsonObject.secret.appId
+        $tenantId = $jsonObject.secret.tenantId
+        $secretText = $jsonObject.secret.secretText
+        $endDateTime = $jsonObject.secret.endDateTime
+        Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
       displayName: 'Check Dynamic Secrets output'
