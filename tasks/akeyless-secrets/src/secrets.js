@@ -46,21 +46,13 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
     helpers.generalFail(`Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
   }
 
-  console.log(`⚒️ dynamicSecretsDictionary: '${dynamicSecretsDictionary}' fetch:`);
-
   // GET DYNAMIC SECRETS
   // GetDynamicSecretValue endpoint only supports fetching a single secret per request, so I iterate over each and fetch it.
   for (const key of Object.keys(dynamicSecretsDictionary)) {
-    console.log(`⚒️ [Debug] '${key}' loop:`);
-
     const akeylessPath = key;
-    console.log(`⚒️⚒️ akeylessPath: '${akeylessPath}'`);
-
     const outputVar = dynamicSecretsDictionary[akeylessPath];
-    console.log(`⚒️⚒️ outputVar: '${outputVar}'`);
 
-    // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
-    // console.log(`Fetching '${akeylessPath}' from akeyless for use in '${outputVar}'...`);
+    console.log(` - Fetching '${akeylessPath}'...`);
 
     const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({
       token: akeylessToken,
@@ -68,18 +60,15 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
       timeout: timeout
     });
 
-    console.log(`⚒️⚒️ dynOpts: '${dynOpts}'`);
-
     // prettier-ignore
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
-      console.log(`⚒️⚒️ secretResult: '${secretResult}'`);
-        
-        // getDynamicSecretValue => secretResult: a single secret value. Pass the entire secretResult object as the secret value
-        helpers.success(outputVar, secretResult, akeylessPath);
-      })
-      .catch(error => {
-        helpers.fetchFail(akeylessPath, JSON.stringify(error));
-      });
+      const resultToReturn = JSON.stringify(secretResult);
+      // getDynamicSecretValue => secretResult: a single secret value. Pass the entire secretResult object as the secret value
+      helpers.success(outputVar, resultToReturn, akeylessPath);
+    })
+    .catch(error => {
+      helpers.fetchFail(akeylessPath, JSON.stringify(error));
+    });
   }
 }
 
