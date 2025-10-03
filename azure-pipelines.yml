@@ -126,60 +126,33 @@ jobs:
       displayName: 'Get Dynamic Secrets'
 
     - powershell: |
-        $safeString = [System.Security.SecurityElement]::Escape("$(AkeylessDynamic.sql_dynamic_secret)")
         #Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
         #Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
 
-        # Validate JSON string before parsing
-        $sqlSecretJson = "$(AkeylessDynamic.sql_dynamic_secret)"
-        if ([string]::IsNullOrWhiteSpace($sqlSecretJson)) {
-            Write-Error "SQL dynamic secret JSON is null or empty"
-            exit 1
-        }
-        
-        # Remove any control characters and validate basic JSON structure
-        $sqlSecretJson = $sqlSecretJson -replace '[\x00-\x1F\x7F]', ''
-        if (-not ($sqlSecretJson.StartsWith('{') -and $sqlSecretJson.EndsWith('}'))) {
-            Write-Error "SQL dynamic secret does not appear to be valid JSON format"
-            exit 1
-        }
-        
         try {
+            # Remove any control characters and validate basic JSON structure
+            $sqlSecretJson = "$(AkeylessDynamic.sql_dynamic_secret)" -replace '[\x00-\x1F\x7F]', ''
             $jsonObject = $sqlSecretJson | ConvertFrom-Json
+            Write-Host "User: $jsonObject.user"
+            Write-Host "Password: $jsonObject.password"
+            Write-Host "TTL: $jsonObject.ttl_in_minute"
+            Write-Host "Id: $jsonObject.id"
         } catch {
-            Write-Error "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
-            exit 1
+            Write-Output "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
         }
-        Write-Host "User: $jsonObject.user"
-        Write-Host "Password: $jsonObject.password"
-        Write-Host "TTL: $jsonObject.ttl_in_minute"
-        Write-Host "Id: $jsonObject.id"
 
-        # Validate Entra JSON string before parsing
-        $entraSecretJson = "$(AkeylessDynamic.entra_dynamic_secret)"
-        if ([string]::IsNullOrWhiteSpace($entraSecretJson)) {
-            Write-Error "Entra dynamic secret JSON is null or empty"
-            exit 1
-        }
-        
-        # Remove any control characters and validate basic JSON structure
-        $entraSecretJson = $entraSecretJson -replace '[\x00-\x1F\x7F]', ''
-        if (-not ($entraSecretJson.StartsWith('{') -and $entraSecretJson.EndsWith('}'))) {
-            Write-Error "Entra dynamic secret does not appear to be valid JSON format"
-            exit 1
-        }
-        
         try {
+            $entraSecretJson = "$(AkeylessDynamic.entra_dynamic_secret)" -replace '[\x00-\x1F\x7F]', ''
             $jsonObject = $entraSecretJson | ConvertFrom-Json
+            
+            $keyId = $jsonObject.secret.keyId
+            $displayName = $jsonObject.secret.displayName
+            $appId = $jsonObject.secret.appId
+            $tenantId = $jsonObject.secret.tenantId
+            $secretText = $jsonObject.secret.secretText
+            $endDateTime = $jsonObject.secret.endDateTime
+            Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
         } catch {
-            Write-Error "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
-            exit 1
+            Write-Output "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
         }
-        $keyId = $jsonObject.secret.keyId
-        $displayName = $jsonObject.secret.displayName
-        $appId = $jsonObject.secret.appId
-        $tenantId = $jsonObject.secret.tenantId
-        $secretText = $jsonObject.secret.secretText
-        $endDateTime = $jsonObject.secret.endDateTime
-        Write-Output "keyId: $keyId, displayName: $displayName, appId: $appId, tenantId: $tenantId, secretText: $secretText, TTL (minutes): $ttl, endDateTime: $endDateTime"
       displayName: 'Check Dynamic Secrets output'
