@@ -4,7 +4,7 @@ const helpers = require('./helpers');
 // IMPORTANT - Uses the GetSecretValue endpoint
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetSecretValue.md
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getSecretValue
-async function processStaticSecrets(api, staticSecrets, akeylessToken, timeout) {
+async function getStatic(api, staticSecrets, akeylessToken, timeout) {
   console.log(`🔓[Static Secrets] Processing static secrets... '${staticSecrets}'`);
 
   const staticSecretsDictionary = JSON.parse(staticSecrets);
@@ -13,6 +13,8 @@ async function processStaticSecrets(api, staticSecrets, akeylessToken, timeout) 
     helpers.generalFail(`Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
   }
 
+  // GET STATIC SECRETS
+  // Get all static secrets in a single request (the GetSecretValue endpoint supports multiple names in one call).
   const statOpts = akeyless.GetSecretValue.constructFromObject({
     token: akeylessToken,
     names: Object.keys(staticSecretsDictionary), // names: is an array of paths to fetch
@@ -34,7 +36,7 @@ async function processStaticSecrets(api, staticSecrets, akeylessToken, timeout) 
 // IMPORTANT: Uses GetDynamicSecretValue endpoint
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
-async function processDynamicSecrets(api, dynamicSecrets, akeylessToken, timeout) {
+async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
   console.log(`🔓 [Dynamic Secrets] Processing dynamic secrets... '${dynamicSecrets}'`);
 
   // Parse input
@@ -44,14 +46,21 @@ async function processDynamicSecrets(api, dynamicSecrets, akeylessToken, timeout
     helpers.generalFail(`Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
   }
 
+  console.log(`⚒️ dynamicSecretsDictionary: '${dynamicSecretsDictionary}' fetch:`);
+
   // GET DYNAMIC SECRETS
-  // Iterate over the dictionary and get each dynamic secret. The keys are the akeyless paths, the values are the desired output variable names
+  // GetDynamicSecretValue endpoint only supports fetching a single secret per request, so I iterate over each and fetch it.
   for (const key of Object.keys(dynamicSecretsDictionary)) {
+    console.log(`⚒️ [Debug] '${key}' loop:`);
+
     const akeylessPath = key;
+    console.log(`⚒️⚒️ akeylessPath: '${akeylessPath}'`);
+
     const outputVar = dynamicSecretsDictionary[akeylessPath];
+    console.log(`⚒️⚒️ outputVar: '${outputVar}'`);
 
     // Let the user know we are attempting to get (this helps significantly when troubleshooting a problem).
-    console.log(`Fetching '${akeylessPath}' from akeyless for use in '${outputVar}'...`);
+    // console.log(`Fetching '${akeylessPath}' from akeyless for use in '${outputVar}'...`);
 
     const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({
       token: akeylessToken,
@@ -59,8 +68,12 @@ async function processDynamicSecrets(api, dynamicSecrets, akeylessToken, timeout
       timeout: timeout
     });
 
+    console.log(`⚒️⚒️ dynOpts: '${dynOpts}'`);
+
     // prettier-ignore
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
+      console.log(`⚒️⚒️ secretResult: '${secretResult}'`);
+        
         // getDynamicSecretValue => secretResult: a single secret value. Pass the entire secretResult object as the secret value
         helpers.success(outputVar, secretResult, akeylessPath);
       })
@@ -70,5 +83,5 @@ async function processDynamicSecrets(api, dynamicSecrets, akeylessToken, timeout
   }
 }
 
-exports.processStaticSecrets = processStaticSecrets;
-exports.processDynamiccSecrets = processDynamicSecrets;
+exports.getStatic = getStatic;
+exports.getDynamic = getDynamic;

@@ -11,11 +11,11 @@ function success(outputName, value, akeylessPath) {
 }
 
 function fetchFail(akeylessPath, errorText) {
-  SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${akeylessPath}'. Error: ${errorText}.`);
+  SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${akeylessPath}'. Error: ${errorText}.`, false);
 }
 
 function generalFail(message) {
-  SDK.setResult(SDK.TaskResult.Failed, message);
+  SDK.setResult(SDK.TaskResult.Failed, message, true);
 }
 
 exports.success = success;

@@ -8,7 +8,7 @@ const input = require('./input');
 async function run() {
   // **** Phase 1 - Get inputs and validate ******** //
 
-  const {accessId, azureJwt, apiUrl, staticSecrets, dynamicSecrets, requestTimeout} = input.fetchAndValidateInput();
+  const {accessId, azureJwt, apiUrl, staticSecrets, dynamicSecrets, requestTimeout} = input.readInputs();
 
   const client = new akeyless.ApiClient();
   client.basePath = apiUrl;
@@ -27,13 +27,13 @@ async function run() {
   // ***** Phase 3 - Fetch akeyless secrets ******** //
 
   if (staticSecrets) {
-    await secrets.processStaticSecrets(api, staticSecrets, akeylessToken, requestTimeout);
+    await secrets.getStatic(api, staticSecrets, akeylessToken, requestTimeout);
   } else {
     console.log(`ℹ️ [Static Secrets] Skipped, staticSecrets paths were not provided.`);
   }
 
   if (dynamicSecrets) {
-    await secrets.processDynamiccSecrets(api, dynamicSecrets, akeylessToken, requestTimeout);
+    await secrets.getDynamic(api, dynamicSecrets, akeylessToken, requestTimeout);
   } else {
     console.log(`ℹ️ [Dynamic Secrets] Skipped, dynamicSecrets paths were not provided.`);
   }
