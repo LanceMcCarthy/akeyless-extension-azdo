@@ -128,15 +128,14 @@ jobs:
     - powershell: |
         # Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
         # Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
-        # Write-Host "Result: $(AkeylessDynamic.custom_dynamic_secret)"
 
-        $jsonObject = "$(AkeylessSqlDynamic.sql_dynamic_secret)" | ConvertFrom-Json
+        $jsonObject = "$(AkeylessDynamic.sql_dynamic_secret)" | ConvertFrom-Json
         Write-Host "User: $jsonObject.user"
         Write-Host "Password: $jsonObject.password"
         Write-Host "TTL: $jsonObject.ttl_in_minute"
         Write-Host "Id: $jsonObject.id"
 
-        $jsonObject = "$(AkeylessEntraDynamic.entra_dynamic_secret)" | ConvertFrom-Json
+        $jsonObject = "$(AkeylessDynamic.entra_dynamic_secret)" | ConvertFrom-Json
         $keyId = $jsonObject.secret.keyId
         $displayName = $jsonObject.secret.displayName
         $appId = $jsonObject.secret.appId
