@@ -11,6 +11,10 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
     - [Accessing the Output](#accessing-the-output)
   - [Static Secrets](#static-secrets)
   - [Dynamic Secrets](#dynamic-secrets)
+    - [Processing Output](#processing-output)
+      - [Example 1. Using jq](#example-1-using-jq)
+      - [Example 2. Using ConvertFrom-Json](#example-2-using-convertfrom-json)
+  - [Support](#support)
 
 ## Getting Started
 
@@ -33,6 +37,7 @@ If this is your first time using the extension, please visit the documentation t
 | `staticSecrets` | No | `string` | Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. |
 | `dynamicSecrets` | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. |
 | `apiUrl` | No | `string`  | Overrides the URL to the akeyless API server. Warning - Do not set this unless you know what you're doing! |
+| `timeout` | No | `Number`  | Overrides the default gateway request timeout of 15 seconds. |
 
 > [!IMPORTANT]
 > When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
@@ -71,6 +76,7 @@ For static secrets, you will get an individual secret output variables for each 
 
 ```yaml
 steps:
+# IMPORTANT - This task has a 'name' assigned.
 - task: AzureCLI@2
   name: 'AzureCLI'
   displayName: 'Get JWT from Azure'
@@ -111,21 +117,29 @@ steps:
      $FRESH_JWT=$(az account get-access-token --query accessToken --output tsv)
      echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$FRESH_JWT"
 
-# We are using $(AzureCLI.azure_jwt)
+# Notice we are using the previous task's name "AzureCLI" to access the output variable $(AzureCLI.azure_jwt)
 - task: akeyless-secrets@1
   name: 'MyAkeylessTask'
   displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
-    dynamicSecrets: '{"/path/to/dynamic/secret":"my_dynamic_secret"}'
+    dynamicSecrets: '{"/path/to/first-dynamic-secret":"my_dynamic_secret_1", "/path/to/second-dynamic-secret":"my_dynamic_secret_2"}'
 ```
 
-You will have `$(MyAkeylessTask.my_dynamic_secret)` available in subsequent tasks of that job. Note that dynamic secrets tend to be complex objects and you will likely need to further process the value to get an inner value.
+You will have the secrets available in subsequent tasks of that job using the "MyAkeylessTask" name of the akeyless task `$(MyAkeylessTask.my_dynamic_secret_1)` and `$(MyAkeylessTask.my_dynamic_secret_2)`.
 
-For example, with a SQL dynamics secret you you can use `jq` to get at each separate value.
+### Processing Output
 
-```
+Note that dynamic secrets tend to be complex objects and you will likely need to further process the value to get an inner value. This topic is outside the scope of this Task, Copilot can assist you with writing the parsing logic.
+
+For now, here are a couple examples.
+
+#### Example 1. Using jq
+
+You can use `jq` to parse out the secret's parts.
+
+```bash
 echo '$(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)' | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
 
 echo $SQL.id
@@ -133,3 +147,23 @@ echo $SQL.user
 echo $SQL.ttl_in_minutes
 echo $SQL.password
 ```
+
+#### Example 2. Using ConvertFrom-Json
+
+You can try PowerShell's `ConvertFrom-Json` function, which will create objects you can access through the property name:
+
+```powershell
+$SQL = '$(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)' | ConvertFrom-Json
+
+Write-Output $SQL.id
+Write-Output $SQL.user
+Write-Output $SQL.ttl_in_minutes
+Write-Output $SQL.password
+```
+
+> [!NOTE]
+> Depending on your secret's content, you may or may not need the `-AsHashtable` switch, see [Example 5 in the Microsoft docs](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json?view=powershell-7.5#example-4-convert-a-json-string-to-a-hash-table).
+
+## Support
+
+Please open a new issue for bug report or feature requests.
