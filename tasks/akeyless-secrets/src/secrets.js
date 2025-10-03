@@ -34,8 +34,8 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
 }
 
 // IMPORTANT: Uses GetDynamicSecretValue endpoint
-// Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
+// Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
 async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
   console.log(`🔓 [Dynamic Secrets] Processing dynamic secrets... '${dynamicSecrets}'`);
 
@@ -57,17 +57,15 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
     const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({
       token: akeylessToken,
       name: akeylessPath, // name: is a single akeyless path
-      timeout: timeout
+      timeout: timeout,
+      json: true
     });
 
     // prettier-ignore
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
       // secretResult is an object containing multiple properties depending on the type of dynamic secret
-      // Escape the JSON string for PowerShell by replacing quotes with backtick-escaped quotes
-      const jsonString = JSON.stringify(secretResult);
-      
       // getDynamicSecretValue => secretResult: a single secret value. Pass the entire secretResult object as the secret value
-      helpers.success(outputVar, jsonString.toString(), akeylessPath);
+      helpers.success(outputVar, secretResult, akeylessPath);
     })
     .catch(error => {
       helpers.fetchFail(akeylessPath, JSON.stringify(error));
