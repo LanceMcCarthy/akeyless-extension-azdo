@@ -64,10 +64,10 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
       // secretResult is an object containing multiple properties depending on the type of dynamic secret
       // Escape the JSON string for PowerShell by replacing quotes with backtick-escaped quotes
-      const jsonString = JSON.stringify(secretResult).replace(/"/g, '`"');
+      const jsonString = JSON.stringify(secretResult);
       
       // getDynamicSecretValue => secretResult: a single secret value. Pass the entire secretResult object as the secret value
-      helpers.success(outputVar, jsonString.replace(/"/g, '`"'), akeylessPath);
+      helpers.success(outputVar, jsonString.toString(), akeylessPath);
     })
     .catch(error => {
       helpers.fetchFail(akeylessPath, JSON.stringify(error));
