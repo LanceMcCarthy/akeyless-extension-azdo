@@ -126,16 +126,55 @@ jobs:
       displayName: 'Get Dynamic Secrets'
 
     - powershell: |
+        $safeString = [System.Security.SecurityElement]::Escape("$(AkeylessDynamic.sql_dynamic_secret)")
         #Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
         #Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
 
-        $jsonObject = "$(AkeylessDynamic.sql_dynamic_secret)" | ConvertFrom-Json
+        # Validate JSON string before parsing
+        $sqlSecretJson = "$(AkeylessDynamic.sql_dynamic_secret)"
+        if ([string]::IsNullOrWhiteSpace($sqlSecretJson)) {
+            Write-Error "SQL dynamic secret JSON is null or empty"
+            exit 1
+        }
+        
+        # Remove any control characters and validate basic JSON structure
+        $sqlSecretJson = $sqlSecretJson -replace '[\x00-\x1F\x7F]', ''
+        if (-not ($sqlSecretJson.StartsWith('{') -and $sqlSecretJson.EndsWith('}'))) {
+            Write-Error "SQL dynamic secret does not appear to be valid JSON format"
+            exit 1
+        }
+        
+        try {
+            $jsonObject = $sqlSecretJson | ConvertFrom-Json
+        } catch {
+            Write-Error "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
+            exit 1
+        }
         Write-Host "User: $jsonObject.user"
         Write-Host "Password: $jsonObject.password"
         Write-Host "TTL: $jsonObject.ttl_in_minute"
         Write-Host "Id: $jsonObject.id"
 
-        $jsonObject = "$(AkeylessDynamic.entra_dynamic_secret)" | ConvertFrom-Json
+        # Validate Entra JSON string before parsing
+        $entraSecretJson = "$(AkeylessDynamic.entra_dynamic_secret)"
+        if ([string]::IsNullOrWhiteSpace($entraSecretJson)) {
+            Write-Error "Entra dynamic secret JSON is null or empty"
+            exit 1
+        }
+        
+        # Remove any control characters and validate basic JSON structure
+        $entraSecretJson = $entraSecretJson -replace '[\x00-\x1F\x7F]', ''
+        if (-not ($entraSecretJson.StartsWith('{') -and $entraSecretJson.EndsWith('}'))) {
+            Write-Error "Entra dynamic secret does not appear to be valid JSON format"
+            exit 1
+        }
+        
+        try {
+            $jsonObject = $entraSecretJson | ConvertFrom-Json
+        } catch {
+            Write-Error "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
+            exit 1
+        }
         $keyId = $jsonObject.secret.keyId
         $displayName = $jsonObject.secret.displayName
         $appId = $jsonObject.secret.appId
