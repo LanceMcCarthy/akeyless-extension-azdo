@@ -126,8 +126,8 @@ jobs:
       displayName: 'Get Dynamic Secrets'
 
     - powershell: |
-        # Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
-        # Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
+        #Write-Host "Result: $(AkeylessDynamic.sql_dynamic_secret)"
+        #Write-Host "Result: $(AkeylessDynamic.entra_dynamic_secret)"
 
         $jsonObject = "$(AkeylessDynamic.sql_dynamic_secret)" | ConvertFrom-Json
         Write-Host "User: $jsonObject.user"
