@@ -10,7 +10,7 @@
     "precommit": "npm run restore && npm run format && npm run lint",
     "bump-task-version": "node -e \"const fs=require('fs');const taskJsonPath='./task.json';const j=JSON.parse(fs.readFileSync(taskJsonPath));let v=j.version;v.Patch++;if(v.Patch>99){v.Patch=0;v.Minor++;}if(v.Minor>99){v.Minor=0;v.Major++;}j.version=v;fs.writeFileSync(taskJsonPath,JSON.stringify(j,null,2));\"",
     "bump-vsx-version": "node -e \"const fs=require('fs');const path='../../vss-extension.json';const j=JSON.parse(fs.readFileSync(path));let v=j.version.split('.').map(Number);v[2]++;if(v[2]>99){v[2]=0;v[1]++;}if(v[1]>99){v[1]=0;v[0]++;}j.version=v.join('.');fs.writeFileSync(path,JSON.stringify(j,null,2));\"",
-    "package-only": "precommit && cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json",
+    "package-only": "npm run precommit && cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json",
     "package-bump-version": "npm run precommit && npm run bump-task-version && npm run bump-vsx-version && cd ../../ && npx tfx-cli extension create --manifest-globs ./vss-extension.json"
   },
   "keywords": [
