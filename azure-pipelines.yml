@@ -126,7 +126,7 @@ jobs:
       displayName: 'Get Dynamic Secrets'
 
     - powershell: |
-        $response = @"$(AkeylessDynamic.entra_dynamic_secret)"@
+        $jsonString = "$(AkeylessDynamic.entra_dynamic_secret)"
         $innerJsonString = $outerJson.id -replace "'", '"'
         $innerJson = $innerJsonString | ConvertFrom-Json
         $secretName = $innerJson.secret_name
