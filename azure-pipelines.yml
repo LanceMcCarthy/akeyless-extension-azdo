@@ -121,29 +121,58 @@ jobs:
       inputs:
         accessid: 'p-sxfgaph9urt4om'
         azureJwt: '$(AzureCLI.azure_jwt)'
-        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret", "/entra-id-live":"entra_dynamic_secret"}'
+        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret", "/entra-id-live":"entra_dynamic_secret", "/custom-web-producer":"custom_web_secret"}'
         timeout: 30
       displayName: 'Get Dynamic Secrets'
 
     - powershell: |
-        try {
-            $sqlObject = $(AkeylessDynamic.sql_dynamic_secret) | ConvertFrom-Json
-            Write-Host "user: $sqlObject.user"
-            Write-Host "password: $sqlObject.password"
-            Write-Host "ttl_in_minute: $sqlObject.ttl_in_minute"
-            Write-Host "id: $sqlObject.id"
-        } catch {
-            Write-Output "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
-        }
+        $response = @"$(AkeylessDynamic.entra_dynamic_secret)"@
+        $innerJsonString = $outerJson.id -replace "'", '"'
+        $innerJson = $innerJsonString | ConvertFrom-Json
+        $secretName = $innerJson.secret_name
+        $secretKeyId = $innerJson.secret_key_id
+        $msg = $outerJson.msg
+        $appId = $outerJson.secret.appId
+        $displayName = $outerJson.secret.displayName
+        $endDateTime = $outerJson.secret.endDateTime
+        $keyId = $outerJson.secret.keyId
+        $secretText = $outerJson.secret.secretText
+        $tenantId = $outerJson.secret.tenantId
+        $ttl = $outerJson.ttl_in_minutes
+        Write-Host "Secret Name: $secretName"
+        Write-Host "Secret Key ID: $secretKeyId"
+        Write-Host "Message: $msg"
+        Write-Host "App ID: $appId"
+        Write-Host "Display Name: $displayName"
+        Write-Host "End DateTime: $endDateTime"
+        Write-Host "Key ID: $keyId"
+        Write-Host "Secret Text: $secretText"
+        Write-Host "Tenant ID: $tenantId"
+        Write-Host "TTL (minutes): $ttl"
 
-        try {
-            $entraObject = $(AkeylessDynamic.entra_dynamic_secret) | ConvertFrom-Json
-            Write-Host "keyId: $($entraObject.secret.keyId)"
-            Write-Host "appId: $($entraObject.secret.appId)"
-            Write-Host "tenantId: $($entraObject.secret.tenantId)"
-            Write-Host "secretText: $($entraObject.secret.secretText)"
-            Write-Host "endDateTime: $($entraObject.secret.endDateTime)"
-        } catch {
-            Write-Output "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
-        }
+
+        # Write-Host "Result 1: $(AkeylessDynamic.sql_dynamic_secret)"
+        # Write-Host "Result 2: $(AkeylessDynamic.entra_dynamic_secret)"
+        # Write-Host "Result 3: $(AkeylessDynamic.custom_web_secret)"
+
+        # try {
+        #     $sqlObject = $(AkeylessDynamic.sql_dynamic_secret) | ConvertFrom-Json
+        #     Write-Host "user: $sqlObject.user"
+        #     Write-Host "password: $sqlObject.password"
+        #     Write-Host "ttl_in_minute: $sqlObject.ttl_in_minute"
+        #     Write-Host "id: $sqlObject.id"
+        # } catch {
+        #     Write-Output "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
+        # }
+
+        # try {
+        #     $entraObject = $(AkeylessDynamic.entra_dynamic_secret) | ConvertFrom-Json
+        #     Write-Host "keyId: $($entraObject.secret.keyId)"
+        #     Write-Host "appId: $($entraObject.secret.appId)"
+        #     Write-Host "tenantId: $($entraObject.secret.tenantId)"
+        #     Write-Host "secretText: $($entraObject.secret.secretText)"
+        #     Write-Host "endDateTime: $($entraObject.secret.endDateTime)"
+        # } catch {
+        #     Write-Output "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
+        # }
       displayName: 'Check Dynamic Secrets output'
