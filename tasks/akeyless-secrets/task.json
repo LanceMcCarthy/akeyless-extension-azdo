@@ -13,8 +13,8 @@
   ],
   "version": {
     "Major": 1,
-    "Minor": 2,
-    "Patch": 4
+    "Minor": 3,
+    "Patch": 0
   },
   "instanceNameFormat": "Akeyless Secrets",
   "groups": [
@@ -83,6 +83,15 @@
       "groupName": "advanced",
       "required": false,
       "helpMarkDown": "The default timeout for each AKeyless API call. Default is 15 seconds, maximum is 100 seconds."
+    },
+    {
+      "name": "autogenerate",
+      "type": "boolean",
+      "label": "Autogenerate Individual Outputs",
+      "defaultValue": "true",
+      "groupName": "advanced",
+      "required": false,
+      "helpMarkDown": "When using dynamic secrets, this feature will automatically create individual output variables for each key/value pair in the JSON output of dynamic secrets. For example, if your dynamic secret returns {\"username\":\"myuser\",\"password\":\"mypassword\"}, then two output variables will be created: $(MyAkeylessStep.username) and $(MyAkeylessStep.password). \r\n\n⚠️ Warning, if you request multiple dynamic secrets in the same task, and the returned json from each has same named keys, the last one fetched will overwrite any previous ones. Use separate tasks in this situation."
     }
   ],
   "execution": {

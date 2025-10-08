@@ -1,3 +1,4 @@
+const SDK = require('azure-pipelines-task-lib/task');
 const akeyless = require('akeyless');
 const helpers = require('./helpers');
 
@@ -23,20 +24,17 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
 
   // prettier-ignore
   api.getSecretValue(statOpts).then(secretResult => {
-      // getSecretValue => secretResult: is a dictionary of key/value pairs of akeyless-path:secret-value. iterate over the returned dictionary of all static secrets
-      for (const [akeylessPath, secretValue] of Object.entries(secretResult)) {
-        helpers.success(staticSecretsDictionary[akeylessPath], secretValue, akeylessPath);
-      }
+      helpers.processStaticSecretResponse(staticSecretsDictionary, secretResult);
     })
     .catch(error => {
-      helpers.fetchFail(akeylessPath, JSON.stringify(error));
+      SDK.setResult(SDK.TaskResult.Failed, `Could not fetch one or more static secrets. Check the secret's path Error: ${JSON.stringify(error)}.`, false);
     });
 }
 
 // IMPORTANT: Uses GetDynamicSecretValue endpoint
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
-async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
+async function getDynamic(api, dynamicSecrets, akeylessToken, timeout, autogenerate) {
   console.log(`🔓 [Dynamic Secrets] Processing dynamic secrets... '${dynamicSecrets}'`);
 
   // Parse input
@@ -52,7 +50,7 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
     const akeylessPath = key;
     const outputVar = dynamicSecretsDictionary[akeylessPath];
 
-    console.log(` - Fetching '${akeylessPath}'...`);
+    console.log(`Fetching '${akeylessPath}'...`);
 
     const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({
       token: akeylessToken,
@@ -63,12 +61,10 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
 
     // prettier-ignore
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
-      // secretResult is an object containing multiple properties depending on the type of dynamic secret
-      // getDynamicSecretValue => secretResult: a single secret value. Pass the entire secretResult object as the secret value
-      helpers.success(outputVar, secretResult, akeylessPath);
+      helpers.processDynamicSecretResponse(akeylessPath, outputVar, secretResult, autogenerate);
     })
     .catch(error => {
-      helpers.fetchFail(akeylessPath, JSON.stringify(error));
+      SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${akeylessPath}'. Error: ${JSON.stringify(error)}.`, false);
     });
   }
 }
