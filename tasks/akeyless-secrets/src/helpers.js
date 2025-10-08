@@ -59,7 +59,10 @@ function processDynamicSecretResponse(akeylessPath, outputVar, secretResult, aut
     }
 
     // PART 1 - Process the secretResult object recursively
-    if (autogenerate === 'true' || autogenerate === true) processNestedObject(secretResult);
+    if (autogenerate === 'true' || autogenerate === true) {
+      console.log(`🛠️ Autogenerate enabled, creating separate outputs...`);
+      processNestedObject(secretResult);
+    }
 
     // PART 2 - For backwards compatibility, also set the complete object as the main output variable (as JSON string)
     const fullSecretJson = JSON.stringify(secretResult);

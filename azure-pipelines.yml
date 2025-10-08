@@ -8,8 +8,8 @@ trigger:
      - 'tasks/**/*'
 
 jobs:
-# JOB 1
-  - job: Akeyless_Custom
+  - job: GetAkeylessSecrets
+    displayName: 'Get Akeyless Secrets'
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -59,7 +59,6 @@ jobs:
         timeout: 30
       displayName: 'Get Entra ID Dynamic Secrets'
 
-
 # Verify Outputs
     - powershell: |
         try {
@@ -71,39 +70,39 @@ jobs:
         } catch {
             Write-Output "Failed read the automatically generated outputs: $($_.Exception.Message)"
         }
-      displayName: 'Check SQL Individual Outputs'
+      displayName: 'Autogen: Check SQL Individual Outputs'
 
     - powershell: |
         try {
           Write-Host "Verifying the automatic generation of individual outputs"
-          Write-Output "$(AkeylessEntraDynamic.id_secret_name)"
-          Write-Output "$(AkeylessEntraDynamic.id_secret_key_id)"
-          Write-Output "$(AkeylessEntraDynamic.msg)"
-          Write-Output "$(AkeylessEntraDynamic.secret_appId)"
-          Write-Output "$(AkeylessEntraDynamic.secret_displayName)"
-          Write-Output "$(AkeylessEntraDynamic.secret_endDateTime)"
-          Write-Output "$(AkeylessEntraDynamic.secret_keyId)"
-          Write-Output "$(AkeylessEntraDynamic.secret_secretText)"
-          Write-Output "$(AkeylessEntraDynamic.secret_tenantId)"
-          Write-Output "$(AkeylessEntraDynamic.ttl_in_minutes)"
+          Write-Output "id_secret_name: $(AkeylessEntraDynamic.id_secret_name)"
+          Write-Output "id_secret_key_id: $(AkeylessEntraDynamic.id_secret_key_id)"
+          Write-Output "msg: $(AkeylessEntraDynamic.msg)"
+          Write-Output "secret_appId: $(AkeylessEntraDynamic.secret_appId)"
+          Write-Output "secret_displayName: $(AkeylessEntraDynamic.secret_displayName)"
+          Write-Output "secret_endDateTime: $(AkeylessEntraDynamic.secret_endDateTime)"
+          Write-Output "secret_keyId: $(AkeylessEntraDynamic.secret_keyId)"
+          Write-Output "secret_secretText: $(AkeylessEntraDynamic.secret_secretText)"
+          Write-Output "secret_tenantId: $(AkeylessEntraDynamic.secret_tenantId)"
+          Write-Output "ttl_in_minutes: $(AkeylessEntraDynamic.ttl_in_minutes)"
         } catch {
             Write-Output "Failed read the automatically generated outputs: $($_.Exception.Message)"
         }
-      displayName: 'Check Entra ID Individual Outputs'
+      displayName: 'Autogen: Check Entra ID Individual Outputs'
 
     - powershell: |
         try {
             $sql = $env:DYNAMIC_SECRET_JSON | ConvertFrom-Json
             Write-Host "Successfully parsed JSON. Available properties: $($sql.PSObject.Properties.Name -join ', ')"
 
-            Write-Host "user: $sql.user"
-            Write-Host "password: $sql.password"
-            Write-Host "ttl_in_minute: $sql.ttl_in_minute"
-            Write-Host "id: $sql.id"
+            Write-Host "user: $($sql.user)"
+            Write-Host "password: $($sql.password)"
+            Write-Host "ttl_in_minute: $($sql.ttl_in_minute)"
+            Write-Host "id: $($sql.id)"
         } catch {
             Write-Output "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
         }
-      displayName: 'Check SQL JSON output'
+      displayName: 'Parse: Check SQL JSON output'
       env:
         # THIS IS IMPORTANT - I you try to use the json directly in the script, it will fail because of the parens in the variable name
         DYNAMIC_SECRET_JSON: $(AkeylessSqlDynamic.sql_dynamic_secret)
@@ -121,85 +120,7 @@ jobs:
         } catch {
             Write-Output "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
         }
-      displayName: 'Check Entra Id JSON output'
+      displayName: 'Parse: Check Entra Id JSON output'
       env:
         # IMPORTANT: Using the env var to avoid issues with parens in the variable name
         DYNAMIC_SECRET_JSON: $(AkeylessEntraDynamic.entra_dynamic_secret)
-
-
-# Job 2 - Uses Akeyless's action as  https://marketplace.visualstudio.com/items?itemName=Akeyless-Engineering.akeyless-secrets-management
-  # - job: Akeyless_Official
-  #   pool:
-  #     vmImage: 'windows-latest'
-  #   steps:
-  #   # Get JWT from Azure Service Principal so we can use it for the akeyless-auth@0 task
-  #   - task: AzureCLI@2
-  #     name: 'AzureCLI'
-  #     inputs:
-  #       azureSubscription: 'Azure MSA Account'
-  #       scriptType: ps
-  #       scriptLocation: inlineScript
-  #       inlineScript: |
-  #         $JWT=$(az account get-access-token --query accessToken --output tsv)
-  #         echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
-  #     displayName: 'Get JWT from Azure Service Principal'
-
-  #   # Important: The 'connectedServiceName` is a service you've added in your AzDO project settings. It simply holds your Akeyless Access ID (ex. 'p-xxxxxxx').
-  #   # Once you have a valid Akeyless token, you can use it to retrieve static and dynamic secrets later
-  #   - task: akeyless-auth@0
-  #     name: AkeylessAuth
-  #     inputs:
-  #       connectedServiceName: 'PersonalAkeylessVault'
-  #       jwt: '$(AzureCLI.azure_jwt)'
-  #     displayName: 'Get Akeyless Access Token'
-
-  #   # Static secrets retrieval
-
-  #   - task: akeyless-get-secrets-value-task@0
-  #     inputs:
-  #       connectedServiceName: 'PersonalAkeylessVault'
-  #       token: '$(AkeylessAuth.akeylessToken)'
-  #       secretsPaths: 'nuget_key=/progress/TELERIK_NUGET_KEY,my_cool_secret=/samples/azdo-test-secret'
-  #     displayName: 'Get Static Secrets'
-
-  #   - powershell: |
-  #       echo "---------------------------------------------"
-  #       echo "Static secrets can simply be referenced by the"
-  #       echo "output variable name you set in the task input."
-  #       echo "---------------------------------------------"
-        
-  #       echo "Verifying static secrets..."
-  #       echo "nuget_key: $(nuget_key)"
-  #       echo "my_cool_secret: $(my_cool_secret)"
-  #     displayName: 'Checking static Secrets'
-
-  #   # Dynamic secrets retrieval
-
-  #   - task: akeyless-get-dynamic-secret-value-task@0
-  #     name: AkeylessSqlDynamic
-  #     inputs:
-  #       connectedServiceName: 'PersonalAkeylessVault'
-  #       token: '$(AkeylessAuth.akeylessToken)'
-  #       name: '/az-dvlup-sqlsrvsecret'
-  #       timeout: 30
-  #     displayName: 'Get SQL Dynamic Secret'
-
-  #   - powershell: |
-  #       echo "Verifying SQL dynamic secret..."
-  #       echo "$(AkeylessSqlDynamic.dynamicSecretValue)"
-  #     displayName: 'Checking Secrets'
-
-  #   - task: akeyless-get-dynamic-secret-value-task@0
-  #     name: AkeylessEntraDynamic
-  #     inputs:
-  #       connectedServiceName: 'PersonalAkeylessVault'
-  #       token: '$(AkeylessAuth.akeylessToken)'
-  #       name: '/entra-id-live'
-  #       timeout: 30
-  #     displayName: 'Get Entra ID Dynamic Secret'
-
-  #   - powershell: |
-  #       echo "Verifying Entra Id dynamic secret..."
-  #       echo "$(AkeylessEntraDynamic.dynamicSecretValue)"
-  #     displayName: 'Checking Secrets'
-
