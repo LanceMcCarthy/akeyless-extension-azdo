@@ -73,27 +73,57 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
     // prettier-ignore
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
       try {
-        //console.log(`Successful API fetch, processing result...`);
+
+
+        console.log(`Successful API fetch, processing result...`);
         console.log(`Pre-processing check: '${JSON.stringify(secretResult)}'`);
 
-        // remove escaped quotes from the stringified JSON to prevent double-escaping issues in PowerShell
-        secretResult = JSON.stringify(secretResult).replace(/\\"/g, "'")
+        // Recursive function to flatten nested objects into individual AzDO output variables
+        function processNestedObject(obj, parentKey = '') {
+          for (const [key, value] of Object.entries(obj)) {
+            const variableName = parentKey ? `${parentKey}_${key}` : key;
+            
+            if (value === null || value === undefined) {
+              // Handle null/undefined values
+              SDK.setVariable(variableName, '', true, true);
+              console.log(`✅ ${variableName} => (empty - was null/undefined)`);
+            } else if (typeof value === 'string') {
+              // Check if string is JSON
+              try {
+                const parsedJson = JSON.parse(value);
+                if (typeof parsedJson === 'object' && parsedJson !== null) {
+                  // String contains JSON object - recursively process it
+                  console.log(`🔄 ${variableName} contains JSON object, processing recursively...`);
+                  processNestedObject(parsedJson, variableName);
+                } else {
+                  // String contains JSON primitive - set as string value
+                  SDK.setVariable(variableName, String(parsedJson), true, true);
+                  console.log(`✅ ${variableName} => ${parsedJson} (parsed JSON primitive)`);
+                }
+              } catch {
+                // Not JSON, treat as regular string
+                SDK.setVariable(variableName, value, true, true);
+                console.log(`✅ ${variableName} => ${value}`);
+              }
+            } else if (typeof value === 'object' && value !== null) {
+              // Nested object - recurse into it
+              console.log(`🔄 ${variableName} is nested object, processing recursively...`);
+              processNestedObject(value, variableName);
+            } else {
+              // Primitive value (number, boolean, etc.)
+              SDK.setVariable(variableName, String(value), true, true);
+              console.log(`✅ ${variableName} => ${value}`);
+            }
+          }
+        }
 
-        // TEMPORARY - OBJECT BREAKOUT
-        // this outputs each object property as its own variable, then the full object as a JSON string.
-        //breakoutProcessing(akeylessPath, secretResult);
+        // Process the secretResult object recursively
+        processNestedObject(secretResult);
 
-        // Now that the entire secretResult is processed, stringify it for final response.
-        // secretResult = JSON.stringify(secretResult);
-        
-        // // Escape characters that can break PowerShell execution
-        // // Replace problematic characters to make it PowerShell-safe
-        // secretResult = helpers.escape(safeSecretResult);
-
-        console.log(`Post-processing check: '${secretResult}'`);
-
-        SDK.setVariable(outputVar, secretResult, true, true);
-        console.log(`✅ '${akeylessPath}' => output var: ${outputVar}, value: ${secretResult}`);
+        // Also set the complete object as the main output variable (as JSON string)
+        const fullSecretJson = JSON.stringify(secretResult);
+        SDK.setVariable(outputVar, fullSecretJson, true, true);
+        console.log(`✅ '${akeylessPath}' => main output var: ${outputVar} (complete JSON)`);
       } catch (e) {
         helpers.generalFail(`Processing the dynamic secret response failed. Error: ${e}`);
       }
@@ -104,42 +134,66 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
   }
 }
 
-// function breakoutProcessing(akeylessPath, secretResult) {
+// function separateOutputsProcessing(akeylessPath, secretResult) {
+//   console.log(` - Processing separate outputs for '${akeylessPath}'...`);
+
+//   // If the secretResult is not an object, just return it as a single output variable.
+//   if (typeof secretResult !== 'object' || secretResult === null) {
+//     const outputVar = `${akeylessPath}`;
+//     SDK.setVariable(outputVar, secretResult, true, true);
+//     console.log(`✅ ${outputVar}, value: ${secretResult}`);
+//     return;
+//   }
+
+//   // If the secretResult is an array, convert it to a JSON string for safe storage as an output variable
+//   if (Array.isArray(secretResult)) {
+//     const outputVar = `${akeylessPath}`;
+//     const variableValue = JSON.stringify(secretResult);
+//     SDK.setVariable(outputVar, variableValue, true, true);
+//     console.log(`✅ ${outputVar}, value: ${variableValue}`);
+//     return;
+//   }
+
+//   // At this point, we know the secretResult is a non-null object (not an array).
+//   // Iterate over each key/value pair in the object.
+//   // For each key/value pair, create an output variable named {akeylessPath}_{key} with the corresponding value.
+
 //   // If the key's value is another object, breakout each property as its own output variable.
 //   for (const [key, value] of Object.entries(secretResult)) {
-//     let variableName = `${akeylessPath}_${key}`;
+//     let outputVar = `${akeylessPath}_${key}`;
 //     let variableValue = value;
 
 //     // If the key's value is a nested object, convert it to a JSON string for safe storage as an output variable
-//     if (typeof value === 'object' && value !== null) {
+//     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
 //       for (const [subkey, subvalue] of Object.entries(secretResult)) {
-//         variableName = `${akeylessPath}_${key}_${subkey}`;
+//         outputVar = `${akeylessPath}_${key}_${subkey}`;
 //         variableValue = JSON.stringify(subvalue);
 
-//         SDK.setVariable(variableName, variableValue, true, true);
-//         console.log(`✅ ${variableName}, value: ${variableValue}`);
+//         SDK.setVariable(outputVar, variableValue, true, true);
+//         console.log(`✅ ${outputVar}, value: ${variableValue}`);
 //       }
 
 //       continue;
 //     }
 
-//     if (typeof variableValue === 'string' && !isNaN(value)) {
-//       // Now that we know the value is not null, is a string, and is not a single number, we can try to parse it as JSON to see if it needs conversion.
-//       try {
-//         // Try to parse the string as JSON
-//         const parsedValue = JSON.parse(variableValue);
-//         variableValue = helpers.escape(parsedValue);
-//         console.log(`'${key}' was a JSON value, parsed to object for safer downstream processing.`);
-//       } catch {
-//         // If it could not parse, it was just a regular string, so we leave it as-is.
-//         console.log(`Value for key '${key}' is fine, moving on.`);
-//       }
-//     }
+//     // if (typeof variableValue === 'string' && !isNaN(value)) {
+//     //   // Now that we know the value is not null, is a string, and is not a single number, we can try to parse it as JSON to see if it needs conversion.
+//     //   try {
+//     //     // Try to parse the string as JSON
+//     //     const parsedValue = JSON.parse(variableValue);
+//     //     variableValue = helpers.escape(parsedValue);
+//     //     console.log(`'${key}' was a JSON value, parsed to object for safer downstream processing.`);
+//     //   } catch {
+//     //     // If it could not parse, it was just a regular string, so we leave it as-is.
+//     //     console.log(`Value for key '${key}' is fine, moving on.`);
+//     //   }
+//     // }
 
-//     SDK.setVariable(variableName, variableValue, true, true);
-//     console.log(`✅ ${variableName}, value: ${variableValue}`);
+//     SDK.setVariable(outputVar, variableValue, true, true);
+//     console.log(`✅ '${akeylessPath}' => output var: ${outputVar}, value: ${variableValue}`);
+//     //console.log(`✅ '${akeylessPath}' => output var: ${outputVar}`);
 //   }
-// }
+//}
 
 exports.getStatic = getStatic;
 exports.getDynamic = getDynamic;
