@@ -34,7 +34,7 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
 // IMPORTANT: Uses GetDynamicSecretValue endpoint
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
-async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
+async function getDynamic(api, dynamicSecrets, akeylessToken, timeout, autogenerate) {
   console.log(`🔓 [Dynamic Secrets] Processing dynamic secrets... '${dynamicSecrets}'`);
 
   // Parse input
@@ -61,7 +61,7 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
 
     // prettier-ignore
     api.getDynamicSecretValue(dynOpts).then(secretResult => {
-      helpers.processDynamicSecretResponse(akeylessPath, outputVar, secretResult);
+      helpers.processDynamicSecretResponse(akeylessPath, outputVar, secretResult, autogenerate);
     })
     .catch(error => {
       SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${akeylessPath}'. Error: ${JSON.stringify(error)}.`, false);

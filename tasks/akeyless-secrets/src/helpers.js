@@ -15,7 +15,7 @@ function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
   }
 }
 
-function processDynamicSecretResponse(akeylessPath, outputVar, secretResult) {
+function processDynamicSecretResponse(akeylessPath, outputVar, secretResult, autogenerate) {
   try {
     console.log(`Successfully fetched '${akeylessPath}', processing result...`);
 
@@ -59,7 +59,7 @@ function processDynamicSecretResponse(akeylessPath, outputVar, secretResult) {
     }
 
     // PART 1 - Process the secretResult object recursively
-    processNestedObject(secretResult);
+    if (autogenerate === 'true' || autogenerate === true) processNestedObject(secretResult);
 
     // PART 2 - For backwards compatibility, also set the complete object as the main output variable (as JSON string)
     const fullSecretJson = JSON.stringify(secretResult);

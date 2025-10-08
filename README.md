@@ -30,17 +30,20 @@ If this is your first time using the extension, please visit the documentation t
 
 ## Inputs
 
-| Name | Required | Type | Value |
-|------|----------|------|-------|
-| `accessId` | Yes | `string`  | The access id for your auth method, see [Getting Started: Akeyless Setup (step 1.6)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) |
-| `azureJwt`  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started: Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) |
-| `staticSecrets` | No | `string` | Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. |
-| `dynamicSecrets` | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. |
-| `apiUrl` | No | `string`  | Overrides the URL to the akeyless API server. Warning - Do not set this unless you know what you're doing! |
-| `timeout` | No | `Number`  | Overrides the default gateway request timeout of 15 seconds. |
+| Name | Required | Type | Value | Default |
+|------|----------|------|-------|---------|
+| `accessId` | Yes | `string`  | The access id for your auth method, see [Getting Started: Akeyless Setup (step 1.6)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#akeyless-setup) | null |
+| `azureJwt`  | Yes | `string`  | This is the JWT token to authenticate with Akeyless, see [Getting Started: Azure Setup](https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/getting-started.md#azure-setup) | null |
+| `staticSecrets` | No | `string` | Static secrets to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. | null |
+| `dynamicSecrets` | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. | null |
+| `apiUrl` | No | `string`  | Overrides the URL to the akeyless API server. Warning - Do not set this unless you know what you're doing! | `https://api.akeyless.io` |
+| `timeout` | No | `Number`  | Overrides the default gateway request timeout of 15 seconds. | `15` |
+| `autogenerate` | No | `Boolean`  | When using dynamic secrets, we automatically create individual output variables for each key/value pair in dynamic secret. Example: If the dynamic secret is `{\"username\":\"myuser\",\"password\":\"mypassword\"}`, then `$(MyAkeylessStep.username)` and `$(MyAkeylessStep.password)` will be created automatically for you. Please see **Important** for key conflict possibility. | `true` |
 
 > [!IMPORTANT]
-> When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
+> - When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
+> - ⚠️ If you request multiple dynamic secrets in the same task, and the same key exists in multiple responses, `autogenerate` will overwrite the key using the latestest fetch value. Use separate tasks for each dynamic secret in this situation.
+> - To avoid PowerShell JSON parsing errors for dynamic secrets, you can use an env to recieve the task's outputs. See the [Processing Output](#processing-output) examples section below.
 
 ## Outputs
 
@@ -140,12 +143,17 @@ For now, here are a couple examples.
 You can use `jq` to parse out the secret's parts.
 
 ```bash
-echo '$(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)' | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
 
-echo $SQL.id
-echo $SQL.user
-echo $SQL.ttl_in_minutes
-echo $SQL.password
+- powershell: |
+    # TIP: Using the env var to avoid issues with parens in the variable name
+    echo $env:DYNAMIC_SECRET_JSON | jq -r 'to_entries|map("SQL_\(.key|ascii_upcase)=\(.value|tostring)")|.[]' >> $SQL
+    echo $SQL.id
+    echo $SQL.user
+    echo $SQL.ttl_in_minutes
+    echo $SQL.password
+  displayName: 'Check Entra Id JSON output'
+  env:
+    DYNAMIC_SECRET_JSON: $(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)
 ```
 
 #### Example 2. Using ConvertFrom-Json
@@ -153,12 +161,16 @@ echo $SQL.password
 You can try PowerShell's `ConvertFrom-Json` function, which will create objects you can access through the property name:
 
 ```powershell
-$SQL = '$(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)' | ConvertFrom-Json
-
-Write-Output $SQL.id
-Write-Output $SQL.user
-Write-Output $SQL.ttl_in_minutes
-Write-Output $SQL.password
+- powershell: |
+    # TIP: Using the env var to avoid issues with parens in the variable name
+    $SQL = $env:DYNAMIC_SECRET_JSON | ConvertFrom-Json
+    Write-Output $SQL.id
+    Write-Output $SQL.user
+    Write-Output $SQL.ttl_in_minutes
+    Write-Output $SQL.password
+  displayName: 'Check Entra Id JSON output'
+  env:
+    DYNAMIC_SECRET_JSON: $(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)
 ```
 
 > [!NOTE]

@@ -7,7 +7,8 @@ const readInputs = () => {
     apiUrl: SDK.getInput('apiUrl'),
     staticSecrets: SDK.getInput('staticSecrets'),
     dynamicSecrets: SDK.getInput('dynamicSecrets'),
-    requestTimeout: SDK.getInput('timeout')
+    requestTimeout: SDK.getInput('timeout'),
+    autogenerate: SDK.getInput('autogenerate')
   };
   return params;
 };
