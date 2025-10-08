@@ -24,7 +24,7 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
 
   // prettier-ignore
   api.getSecretValue(statOpts).then(secretResult => {
-      helpers.processStaticSecretResponse(secretResult);
+      helpers.processStaticSecretResponse(staticSecretsDictionary, secretResult);
     })
     .catch(error => {
       SDK.setResult(SDK.TaskResult.Failed, `Could not fetch one or more static secrets. Check the secret's path Error: ${JSON.stringify(error)}.`, false);
@@ -50,7 +50,7 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout) {
     const akeylessPath = key;
     const outputVar = dynamicSecretsDictionary[akeylessPath];
 
-    console.log(` - Fetching '${akeylessPath}'...`);
+    console.log(`Fetching '${akeylessPath}'...`);
 
     const dynOpts = akeyless.GetDynamicSecretValue.constructFromObject({
       token: akeylessToken,

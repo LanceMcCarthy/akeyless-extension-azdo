@@ -29,13 +29,13 @@ async function run() {
   if (staticSecrets) {
     await secrets.getStatic(api, staticSecrets, akeylessToken, requestTimeout);
   } else {
-    console.log(`ℹ️ [Static Secrets] Skipped, staticSecrets paths were not provided.`);
+    console.log(`🔒 [Static Secrets] No staticSecrets value provided, skipping request.`);
   }
 
   if (dynamicSecrets) {
     await secrets.getDynamic(api, dynamicSecrets, akeylessToken, requestTimeout);
   } else {
-    console.log(`ℹ️ [Dynamic Secrets] Skipped, dynamicSecrets paths were not provided.`);
+    console.log(`🔒 [Dynamic Secrets] No dynamicSecrets value provided, skipping request.`);
   }
 }
 
