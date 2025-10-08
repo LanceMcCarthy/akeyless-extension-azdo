@@ -8,10 +8,11 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
   - [Outputs](#outputs)
     - [YAML Pipelines](#yaml-pipelines)
     - [Classic Pipelines](#classic-pipelines)
-    - [Accessing the Output](#accessing-the-output)
   - [Static Secrets](#static-secrets)
   - [Dynamic Secrets](#dynamic-secrets)
-    - [Processing Output](#processing-output)
+    - [Automatic Outputs](#automatic-outputs)
+    - [Plain Output](#plain-output)
+    - [Processing Simple Output](#processing-simple-output)
       - [Example 1. Using jq](#example-1-using-jq)
       - [Example 2. Using ConvertFrom-Json](#example-2-using-convertfrom-json)
   - [Support](#support)
@@ -38,16 +39,15 @@ If this is your first time using the extension, please visit the documentation t
 | `dynamicSecrets` | No | `string` | Dynamic secret to fetch from AKeyless. This must be a dictionary object, where the 'key' is the secret's path in akeyless and the 'value' is what you want the output variable to be named. **See important note below**. | null |
 | `apiUrl` | No | `string`  | Overrides the URL to the akeyless API server. Warning - Do not set this unless you know what you're doing! | `https://api.akeyless.io` |
 | `timeout` | No | `Number`  | Overrides the default gateway request timeout of 15 seconds. | `15` |
-| `autogenerate` | No | `Boolean`  | When using dynamic secrets, we automatically create individual output variables for each key/value pair in dynamic secret. Example: If the dynamic secret is `{\"username\":\"myuser\",\"password\":\"mypassword\"}`, then `$(MyAkeylessStep.username)` and `$(MyAkeylessStep.password)` will be created automatically for you. Please see **Important** for key conflict possibility. | `true` |
+| `autogenerate` | No | `Boolean`  | Automatically create output variables for dynamic secrets. | `true` |
 
 > [!IMPORTANT]
 > - When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
-> - ⚠️ If you request multiple dynamic secrets in the same task, and the same key exists in multiple responses, `autogenerate` will overwrite the key using the latestest fetch value. Use separate tasks for each dynamic secret in this situation.
-> - To avoid PowerShell JSON parsing errors for dynamic secrets, you can use an env to recieve the task's outputs. See the [Processing Output](#processing-output) examples section below.
+> - To avoid PowerShell JSON parsing errors for dynamic secrets, use an env to pass the task's outputs. See the [Processing Plain Output](#processing-plain-output) examples.
 
 ## Outputs
 
-The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs. In order to access these outputs, you need to set the **reference name** of the task.
+The task's outputs are determined by the values set in your `staticSecrets` and `dynamicSecrets` inputs. In order to access these outputs, first you must set the **reference name** of the task.
 
 ### YAML Pipelines
 
@@ -61,11 +61,9 @@ When writing the task in YAML, you set the reference name using the `name` prope
 
 ### Classic Pipelines
 
-If you are using classic pipelines, you will find the  `Reference Name` setting under the Output Variables section:
+If you are using classic pipelines, you will find the `Reference Name` setting under the Output Variables section:
 
 ![ref name](https://github.com/LanceMcCarthy/akeyless-extension-azdo/assets/3520532/a7109870-2660-43f2-9878-42ee6f1dfe6a)
-
-### Accessing the Output
 
 Now with the reference name, you can access the output(s):
 
@@ -105,34 +103,55 @@ You will have `$(MyAkeylessTask.first_secret)` and  `$(MyAkeylessTask.second_sec
 
 ## Dynamic Secrets
 
-For dynamic secrets, the output variable that holds all of that dynamic secret's output. For example:
+For dynamic secrets, the outputs are available as both individual outputs and the entire value.
+
+- [Automatic Output](#automatic-outputs)
+- [Plain Output](#plain-output)
+
+### Automatic Outputs
+
+By default, the dynamic secret will be parsed into a separate output for every value in the secret. This fully supports any number of nested levels, each level uses its parent key to avoid key conflicts.
+
+For example, if the secret is  `{"id": "-","person": { "username": "-", "password": "-"},"expiration": "-"}` these these outputs are autmatically generated for you:
+
+- `id` 
+- `person_username` 
+- `person_password` 
+- `expiration`
+
+Using the automatic outputs is just as easy as using static secrets, every output variable is directly accessible using the generated key name.
+
+```powershell
+Write-Output "Id: $(MyAkeylessTask.id)"
+Write-Output "Person_Username: $(MyAkeylessTask.person_username)"
+Write-Output "Person_Password: $(MyAkeylessTask.person_password)"
+Write-Output "Expires: $(MyAkeylessTask.expiration)"
+```
+
+This is recursive, concatenating the `parentkey_childkey` and each level separated with underscores. It can go as deep as it needs to. 
+
+> [!WARNING]
+> If you requesting multiple dynamic secrets in the same task, and the same key exists in multiple dynamic secret responses (e.g. `id`), that key's value will be overwritten on each fetch. **Solution**: Use a separate task for each dynamic secret in this situation.
+
+### Plain Output
+
+The entire secret's value is produced within in the output variable you named when setting the secret. For example, here we've requested the output variable's name to be `secret_1`
 
 ```yaml
-steps:
-- task: AzureCLI@2
-  name: 'AzureCLI'
-  displayName: 'Get JWT from Azure'
-  inputs:
-    azureSubscription: 'My Azure Service Principal'
-    scriptType: ps
-    scriptLocation: inlineScript
-    inlineScript: |
-     $FRESH_JWT=$(az account get-access-token --query accessToken --output tsv)
-     echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$FRESH_JWT"
-
-# Notice we are using the previous task's name "AzureCLI" to access the output variable $(AzureCLI.azure_jwt)
 - task: akeyless-secrets@1
   name: 'MyAkeylessTask'
   displayName: 'Get Secrets from Akeyless'
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
-    dynamicSecrets: '{"/path/to/first-dynamic-secret":"my_dynamic_secret_1", "/path/to/second-dynamic-secret":"my_dynamic_secret_2"}'
+    dynamicSecrets: '{"/first-dynamic-secret":"secret_1"}'
 ```
 
-You will have the secrets available in subsequent tasks of that job using the "MyAkeylessTask" name of the akeyless task `$(MyAkeylessTask.my_dynamic_secret_1)` and `$(MyAkeylessTask.my_dynamic_secret_2)`.
+Now you'll have the entire response's value in the `$(MyAkeylessTask.secret_1)` output. However you will need ot manually parse it, 
 
-### Processing Output
+### Processing Simple Output
+
+If you have chosen to skip automatic output generation, or need to use the entire value.
 
 Note that dynamic secrets tend to be complex objects and you will likely need to further process the value to get an inner value. This topic is outside the scope of this Task, Copilot can assist you with writing the parsing logic.
 
@@ -178,4 +197,4 @@ You can try PowerShell's `ConvertFrom-Json` function, which will create objects 
 
 ## Support
 
-Please open a new issue for bug report or feature requests.
+Please open a new issue on GitHub for bug report or feature requests.
