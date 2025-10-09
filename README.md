@@ -5,17 +5,11 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
 - [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
   - [Getting Started](#getting-started)
   - [Inputs](#inputs)
-  - [Outputs](#outputs)
-    - [YAML Pipelines](#yaml-pipelines)
-    - [Classic Pipelines](#classic-pipelines)
+  - [Reference Outputs](#outputs) ([YAML](#yaml-pipelines) or [Classic](#classic-pipelines))
   - [Static Secrets](#static-secrets)
   - [Dynamic Secrets](#dynamic-secrets)
-    - [Automatic Outputs](#automatic-outputs)
-      - [Automatic Output Examples](#automatic-output-examples)
-    - [Plain Output](#plain-output)
-    - [Simple Output Examples](#simple-output-examples)
-      - [Example 1. Using jq](#example-1-using-jq)
-      - [Example 2. Using ConvertFrom-Json](#example-2-using-convertfrom-json)
+    - [Automatic Outputs](#automatic-outputs) ([examples](#automatic-output-examples))
+    - [Plain Output](#plain-output) ([examples](#simple-output-examples))
   - [Support](#support)
  
 > [!NOTE]
@@ -176,11 +170,11 @@ Write-Output "COMPLETE JSON RESPONSE: $(MyAkeylessTask.secret1)"
 > [!Caution]
 > You need to carefully process this output, as PowerShell may throw errors while trying to convert JSON that has nested objects or quotes. See the exampels below for how to handle this situation using `env` for the output.
 
-### Simple Output Examples
+#### Simple Output Examples
 
 It's important to rememebr when using the Simple Output option that dynamic secrets tend to be complex objects. You will likely need to further process the value to get to an inner value. This topic is outside the scope of this Task, I will share two examples, but GitHub Copilot is great with parsing logic.
 
-#### Example 1. Using jq
+##### Example 1. Using jq <!-- omit in toc -->
 
 You can use `jq` to parse out the secret's parts.
 
@@ -198,7 +192,7 @@ You can use `jq` to parse out the secret's parts.
     DYNAMIC_SECRET_JSON: $(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)
 ```
 
-#### Example 2. Using ConvertFrom-Json
+##### Example 2. Using ConvertFrom-Json <!-- omit in toc -->
 
 You can try PowerShell's `ConvertFrom-Json` function, which will create objects you can access through the property name:
 
@@ -214,9 +208,6 @@ You can try PowerShell's `ConvertFrom-Json` function, which will create objects 
   env:
     DYNAMIC_SECRET_JSON: $(MyAkeylessTask.MY_SQL_DYNAMIC_SECRET)
 ```
-
-> [!NOTE]
-> Depending on your secret's content, you may or may not need the `-AsHashtable` switch, see [Example 5 in the Microsoft docs](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json?view=powershell-7.5#example-4-convert-a-json-string-to-a-hash-table).
 
 ## Support
 
