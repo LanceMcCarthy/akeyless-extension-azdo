@@ -13,6 +13,8 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
+    # Get credentials for Akeyless from Azure Service Principal
+
     - task: AzureCLI@2
       name: 'AzureCLI'
       inputs:
@@ -24,7 +26,8 @@ jobs:
           echo "##vso[task.setvariable variable=azure_jwt;isoutput=true;issecret=true]$JWT"
       displayName: 'Get JWT from Azure Service Principal'
 
-    # Static Secrets test
+    # Get static secrets
+
     - task: akeyless-secrets@1
       name: 'AkeylessStatic'
       inputs:
@@ -33,94 +36,75 @@ jobs:
         staticSecrets: '{"/progress/TELERIK_NUGET_KEY":"nuget_key", "/docker/DOCKER_HUB_USERNAME":"docker_hub_un", "/apple/lance-apple-account-username":"apple_acct_un"}'
       displayName: 'Get Static Secrets'
 
+    # Get dynamic secrets
+
+    - task: akeyless-secrets@1
+      name: 'AkeylessDynamic'
+      inputs:
+        accessid: 'p-sxfgaph9urt4om'
+        azureJwt: '$(AzureCLI.azure_jwt)'
+        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"mySqlSecret", "/entra-id-live":"myEntraSecret"}'
+        timeout: 30
+      displayName: 'Get Dynamic Secrets'
+
+    # Verify Outputs
+
     - powershell: |
         Write-Host "Output 1 (nuget_key): $(AkeylessStatic.nuget_key)"
         Write-Host "Output 2 (docker_hub_un): $(AkeylessStatic.docker_hub_un)"
         Write-Host "Output 3 (apple_acct_un): $(AkeylessStatic.apple_acct_un)"
-      displayName: 'Check Static Secret'
+      displayName: '[Static] Check static secret outputs'
 
-    # Dynamic secrets tests
-
-    - task: akeyless-secrets@1
-      name: 'AkeylessSqlDynamic'
-      inputs:
-        accessid: 'p-sxfgaph9urt4om'
-        azureJwt: '$(AzureCLI.azure_jwt)'
-        dynamicSecrets: '{"/az-dvlup-sqlsrvsecret":"sql_dynamic_secret"}'
-        timeout: 30
-      displayName: 'Get SQL Dynamic Secrets'
-
-    - task: akeyless-secrets@1
-      name: 'AkeylessEntraDynamic'
-      inputs:
-        accessid: 'p-sxfgaph9urt4om'
-        azureJwt: '$(AzureCLI.azure_jwt)'
-        dynamicSecrets: '{"/entra-id-live":"entra_dynamic_secret"}'
-        timeout: 30
-      displayName: 'Get Entra ID Dynamic Secrets'
-
-# Verify Outputs
     - powershell: |
         try {
-          Write-Host "Verifying the automatic generation of individual outputs"
-          Write-Output "$(AkeylessSqlDynamic.id)"
-          Write-Output "$(AkeylessSqlDynamic.password)"
-          Write-Output "$(AkeylessSqlDynamic.ttl_in_minutes)"
-          Write-Output "$(AkeylessSqlDynamic.user)"
+          Write-Host "Verify Autogen outputs for mySqlSecret"
+          Write-Output "$(AkeylessDynamic.mySqlSecret_id)"
+          Write-Output "$(AkeylessDynamic.mySqlSecret_password)"
+          Write-Output "$(AkeylessDynamic.mySqlSecret_ttl_in_minutes)"
+          Write-Output "$(AkeylessDynamic.mySqlSecret_user)"
+
+          Write-Host "Verify Autogen outputs for myEntraSecret"
+          Write-Output "id_secret_name: $(AkeylessDynamic.myEntraSecret_id_secret_name)"
+          Write-Output "id_secret_key_id: $(AkeylessDynamic.myEntraSecret_id_secret_key_id)"
+          Write-Output "msg: $(AkeylessDynamic.myEntraSecret_msg)"
+          Write-Output "secret_appId: $(AkeylessDynamic.myEntraSecret_secret_appId)"
+          Write-Output "secret_displayName: $(AkeylessDynamic.myEntraSecret_secret_displayName)"
+          Write-Output "secret_endDateTime: $(AkeylessDynamic.myEntraSecret_secret_endDateTime)"
+          Write-Output "secret_keyId: $(AkeylessDynamic.myEntraSecret_secret_keyId)"
+          Write-Output "secret_secretText: $(AkeylessDynamic.myEntraSecret_secret_secretText)"
+          Write-Output "secret_tenantId: $(AkeylessDynamic.myEntraSecret_secret_tenantId)"
+          Write-Output "ttl_in_minutes: $(AkeylessDynamic.myEntraSecret_ttl_in_minutes)"
+
         } catch {
             Write-Output "Failed read the automatically generated outputs: $($_.Exception.Message)"
         }
-      displayName: 'Autogen: Check SQL Individual Outputs'
+      displayName: '[Dynamic] Autogen: Check individual outputs'
 
     - powershell: |
         try {
-          Write-Host "Verifying the automatic generation of individual outputs"
-          Write-Output "id_secret_name: $(AkeylessEntraDynamic.id_secret_name)"
-          Write-Output "id_secret_key_id: $(AkeylessEntraDynamic.id_secret_key_id)"
-          Write-Output "msg: $(AkeylessEntraDynamic.msg)"
-          Write-Output "secret_appId: $(AkeylessEntraDynamic.secret_appId)"
-          Write-Output "secret_displayName: $(AkeylessEntraDynamic.secret_displayName)"
-          Write-Output "secret_endDateTime: $(AkeylessEntraDynamic.secret_endDateTime)"
-          Write-Output "secret_keyId: $(AkeylessEntraDynamic.secret_keyId)"
-          Write-Output "secret_secretText: $(AkeylessEntraDynamic.secret_secretText)"
-          Write-Output "secret_tenantId: $(AkeylessEntraDynamic.secret_tenantId)"
-          Write-Output "ttl_in_minutes: $(AkeylessEntraDynamic.ttl_in_minutes)"
+          $sql = $env:SQL_SECRET_JSON | ConvertFrom-Json
+          Write-Host "Successfully parsed SQL dynamic secret's JSON. Available properties: $($sql.PSObject.Properties.Name -join ', ')"
+          Write-Host "user: $($sql.user)"
+          Write-Host "password: $($sql.password)"
+          Write-Host "ttl_in_minute: $($sql.ttl_in_minute)"
+          Write-Host "id: $($sql.id)"
         } catch {
-            Write-Output "Failed read the automatically generated outputs: $($_.Exception.Message)"
+          Write-Output "Failed to parse SQL dynamic secret: $($_.Exception.Message)"
         }
-      displayName: 'Autogen: Check Entra ID Individual Outputs'
-
-    - powershell: |
         try {
-            $sql = $env:DYNAMIC_SECRET_JSON | ConvertFrom-Json
-            Write-Host "Successfully parsed JSON. Available properties: $($sql.PSObject.Properties.Name -join ', ')"
-
-            Write-Host "user: $($sql.user)"
-            Write-Host "password: $($sql.password)"
-            Write-Host "ttl_in_minute: $($sql.ttl_in_minute)"
-            Write-Host "id: $($sql.id)"
+          $entra = $env:ENTRA_SECRET_JSON | ConvertFrom-Json
+          Write-Host "Successfully parsed Entra ID dynamic secret's JSON. Available properties: $($entra.PSObject.Properties.Name -join ', ')"
+          Write-Host "keyId: $($entra.secret.keyId)"
+          Write-Host "appId: $($entra.secret.appId)"
+          Write-Host "tenantId: $($entra.secret.tenantId)"
+          Write-Host "secretText: $($entra.secret.secretText)"
+          Write-Host "endDateTime: $($entra.secret.endDateTime)"
         } catch {
-            Write-Output "Failed to parse SQL dynamic secret JSON: $($_.Exception.Message)"
+          Write-Output "Failed to parse Entra dynamic secret: $($_.Exception.Message)"
         }
-      displayName: 'Parse: Check SQL JSON output'
+      displayName: '[Dynamic] Simple Output: Parse the full response.'
       env:
-        # THIS IS IMPORTANT - I you try to use the json directly in the script, it will fail because of the parens in the variable name
-        DYNAMIC_SECRET_JSON: $(AkeylessSqlDynamic.sql_dynamic_secret)
+        # IMPORTANT: See caution note https://github.com/LanceMcCarthy/akeyless-extension-azdo?tab=readme-ov-file#plain-output
+        SQL_SECRET_JSON: $(AkeylessDynamic.mySqlSecret)
+        ENTRA_SECRET_JSON: $(AkeylessDynamic.myEntraSecret)
 
-    - powershell: |
-        try {
-            $entra = $env:DYNAMIC_SECRET_JSON | ConvertFrom-Json
-            Write-Host "Successfully parsed JSON. Available properties: $($entra.PSObject.Properties.Name -join ', ')"
-
-            Write-Host "keyId: $($entra.secret.keyId)"
-            Write-Host "appId: $($entra.secret.appId)"
-            Write-Host "tenantId: $($entra.secret.tenantId)"
-            Write-Host "secretText: $($entra.secret.secretText)"
-            Write-Host "endDateTime: $($entra.secret.endDateTime)"
-        } catch {
-            Write-Output "Failed to parse Entra dynamic secret JSON: $($_.Exception.Message)"
-        }
-      displayName: 'Parse: Check Entra Id JSON output'
-      env:
-        # IMPORTANT: Using the env var to avoid issues with parens in the variable name
-        DYNAMIC_SECRET_JSON: $(AkeylessEntraDynamic.entra_dynamic_secret)

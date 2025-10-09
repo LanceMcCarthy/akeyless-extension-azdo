@@ -22,7 +22,10 @@ function processDynamicSecretResponse(akeylessPath, outputVar, secretResult, aut
     // Recursive function to flatten nested objects into individual AzDO output variables
     function processNestedObject(obj, parentKey = '') {
       for (const [key, value] of Object.entries(obj)) {
-        const variableName = parentKey ? `${parentKey}_${key}` : key;
+        let variableName = parentKey ? `${parentKey}_${key}` : key;
+
+        // put the requested output var name as the main prefix. This avoids key conflicts in if multiple secrets have the same key names
+        variableName = `${outputVar}_${variableName}`;
 
         if (value === null || value === undefined) {
           // Handle null/undefined values
