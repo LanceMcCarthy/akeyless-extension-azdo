@@ -16,6 +16,9 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
       - [Example 1. Using jq](#example-1-using-jq)
       - [Example 2. Using ConvertFrom-Json](#example-2-using-convertfrom-json)
   - [Support](#support)
+ 
+> [!NOTE]
+> Akeyless now has an official AzDO Task! I am committed to maintaining this one, but now you have a choice :) See their docs for setup info => [akeyless-azure-devops-extension](https://docs.akeyless.io/docs/akeyless-azure-devops-extension).
 
 ## Getting Started
 
