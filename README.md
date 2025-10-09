@@ -1,4 +1,4 @@
-# AKeyless Extension for Azure DevOps
+# AKeyless Extension for Azure DevOps - [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main)
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
