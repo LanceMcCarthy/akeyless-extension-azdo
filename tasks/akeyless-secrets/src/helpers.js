@@ -15,22 +15,18 @@ function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
   }
 }
 
-function processDynamicSecretResponse(akeylessPath, outputVar, secretResult, autogenerate) {
+function processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, autogenerate) {
   try {
     console.log(`Successfully fetched '${akeylessPath}', processing result...`);
 
     // Recursive function to flatten nested objects into individual AzDO output variables
     function processNestedObject(obj, parentKey = '') {
       for (const [key, value] of Object.entries(obj)) {
-        let variableName = parentKey ? `${parentKey}_${key}` : key;
-
-        // put the requested output var name as the main prefix. This avoids key conflicts in if multiple secrets have the same key names
-        variableName = `${outputVar}_${variableName}`;
+        const variableName = parentKey ? `${parentKey}_${key}` : key;
 
         if (value === null || value === undefined) {
           // Handle null/undefined values
-          SDK.setVariable(variableName, '', true, true);
-          console.log(`✅ Output: ${variableName} => (⚠️ empty ⚠️ This was null/undefined.)`);
+          setAutoGenOutput(outputPrefix, variableName, '', '(⚠️ empty ⚠️ This was null/undefined.)');
         } else if (typeof value === 'string') {
           // Check if string is JSON
           try {
@@ -40,23 +36,19 @@ function processDynamicSecretResponse(akeylessPath, outputVar, secretResult, aut
               console.log(`🔄 ${variableName} contains JSON object, processing recursively...`);
               processNestedObject(parsedJson, variableName);
             } else {
-              // String contains JSON primitive - set as string value
-              SDK.setVariable(variableName, String(parsedJson), true, true);
-              console.log(`✅ Output: ${variableName} => ${parsedJson} (parsed JSON primitive)`);
+              // otherwise it's a primitive (string, number, boolean)
+              setAutoGenOutput(outputPrefix, variableName, String(parsedJson), '(parsed JSON primitive)');
             }
           } catch {
-            // Not JSON, treat as regular string
-            SDK.setVariable(variableName, value, true, true);
-            console.log(`✅ Output: ${variableName} => ${value}`);
+            // Not JSON, just a regular string
+            setAutoGenOutput(outputPrefix, variableName, value, '');
           }
         } else if (typeof value === 'object' && value !== null) {
           // Nested object - recurse into it
           console.log(`🔄 ${variableName} is nested object, processing recursively...`);
           processNestedObject(value, variableName);
         } else {
-          // Primitive value (number, boolean, etc.)
-          SDK.setVariable(variableName, String(value), true, true);
-          console.log(`✅ Output: ${variableName} => ${value}`);
+          setAutoGenOutput(outputPrefix, variableName, String(value), '');
         }
       }
     }
@@ -67,13 +59,20 @@ function processDynamicSecretResponse(akeylessPath, outputVar, secretResult, aut
       processNestedObject(secretResult);
     }
 
-    // PART 2 - For backwards compatibility, also set the complete object as the main output variable (as JSON string)
+    // PART 2 - For backwards compatibility, I still set complete object as the main output variable (as JSON string)
     const fullSecretJson = JSON.stringify(secretResult);
-    SDK.setVariable(outputVar, fullSecretJson, true, true);
-    console.log(`✅ Output: ${outputVar} (complete response) => '${akeylessPath}'`);
+    SDK.setVariable(outputPrefix, fullSecretJson, true, true);
+    console.log(`✅ Output: ${outputPrefix} (complete response) => '${akeylessPath}'`);
   } catch (e) {
     helpers.generalFail(`Processing the dynamic secret response failed. Error: ${e}`);
   }
+}
+
+function setAutoGenOutput(prefix, propName, value, extraLogMessage) {
+  // Use the developer's output name as the top prefix, this avoids overwrites if multiple secrets have the same keys.
+  const variableName = `${prefix}_${propName}`;
+  SDK.setVariable(variableName, value, true, true);
+  console.log(`✅ Output: ${variableName} => ${value}. ${extraLogMessage || ''}`);
 }
 
 function generalFail(message) {
