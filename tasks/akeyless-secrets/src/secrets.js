@@ -3,12 +3,18 @@ const akeyless = require('akeyless');
 const helpers = require('./helpers');
 
 // IMPORTANT - Uses the GetSecretValue endpoint
-// Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetSecretValue.md
-// Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getSecretValue
+// Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getSecretValue
+// Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetSecretValue.md
 async function getStatic(api, staticSecrets, akeylessToken, timeout) {
   console.log(`🔓[Static Secrets] Processing static secrets... '${staticSecrets}'`);
 
-  const staticSecretsDictionary = JSON.parse(staticSecrets);
+  let staticSecretsDictionary;
+  try {
+    staticSecretsDictionary = JSON.parse(staticSecrets);
+  } catch (error) {
+    helpers.generalFail(`Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
+    return;
+  }
 
   if (staticSecretsDictionary === undefined) {
     helpers.generalFail(`Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
@@ -32,13 +38,19 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
 }
 
 // IMPORTANT: Uses GetDynamicSecretValue endpoint
-// Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
-// Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
+// Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
+// Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
 async function getDynamic(api, dynamicSecrets, akeylessToken, timeout, autogenerate) {
   console.log(`🔓 [Dynamic Secrets] Processing dynamic secrets... '${dynamicSecrets}'`);
 
   // Parse input
-  let dynamicSecretsDictionary = JSON.parse(dynamicSecrets);
+  let dynamicSecretsDictionary;
+  try {
+    dynamicSecretsDictionary = JSON.parse(dynamicSecrets);
+  } catch (error) {
+    helpers.generalFail(`Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
+    return;
+  }
 
   if (dynamicSecretsDictionary === undefined) {
     helpers.generalFail(`Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);

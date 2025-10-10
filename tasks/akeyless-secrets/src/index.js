@@ -1,6 +1,7 @@
 const SDK = require('azure-pipelines-task-lib/task');
 const akeyless = require('akeyless');
 const helpers = require('./helpers');
+const akeylessApi = require('./akeyless_api');
 const auth = require('./auth');
 const secrets = require('./secrets');
 const input = require('./input');
@@ -10,9 +11,7 @@ async function run() {
 
   const {accessId, azureJwt, apiUrl, staticSecrets, dynamicSecrets, requestTimeout, autogenerate} = input.readInputs();
 
-  const client = new akeyless.ApiClient();
-  client.basePath = apiUrl;
-  const api = new akeyless.V2Api(client);
+  const api = akeylessApi.api(apiUrl);
 
   console.log(`🔔 Important Reminder: To reference a task's outputs, the task needs a 'name' (or a 'Reference Name' for classic pipelines). See this real-world example https://github.com/LanceMcCarthy/akeyless-extension-azdo/blob/main/docs/examples.md#conclusion--real-world-example.`);
 

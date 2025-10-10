@@ -1,0 +1,27 @@
+name: 'Publish Release'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-package:
+    runs-on: windows-latest
+    name: Run Tests
+    env:
+        NODE_OPTIONS: "--max_old_space_size=4096"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: "Prepare code"
+      working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
+      run: |
+        npm run restore
+        npm run format
+        npm run lint
+        npm run test:coverage
