@@ -5,9 +5,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'tasks/akeyless-secrets/src/**/*'
 
 jobs:
-  build-and-package:
+  build-and-test:
     runs-on: windows-latest
     name: Run Tests
     env:
@@ -18,7 +20,7 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: "Prepare code"
+    - name: "Test"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
       run: |
         npm run restore
