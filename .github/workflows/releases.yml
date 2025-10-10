@@ -27,6 +27,7 @@ jobs:
         npm run restore
         npm run format
         npm run lint
+        npm run test:coverage
 
     - name: "Package and publish AzDO extension"
       run: |
