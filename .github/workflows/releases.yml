@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - "releases/*"
+    paths:
+      - 'tasks/akeyless-secrets/src/**/*'
 
 jobs:
   build-and-package:
@@ -21,7 +23,7 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: "Prepare code"
+    - name: "Prepare code & Test"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
       run: |
         npm run restore
