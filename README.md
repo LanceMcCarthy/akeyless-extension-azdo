@@ -1,14 +1,11 @@
 # AKeyless Extension for Azure DevOps - 
 
-| Workflow | Status |
-|---|---|
-| Main | [![Main - Tests](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml) |
-| Publish Release | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg?branch=main)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml) |
-| AzDO Pipeline | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
+
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
 - [AKeyless Extension for Azure DevOps](#akeyless-extension-for-azure-devops)
+  - [Installation](#installation)
   - [Getting Started](#getting-started)
   - [Inputs](#inputs)
   - [Reference Outputs](#outputs) ([YAML](#yaml-pipelines) or [Classic](#classic-pipelines))
@@ -18,15 +15,24 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
     - [Plain Output](#plain-output) ([examples](#simple-output-examples))
   - [Support](#support)
  
-> [!NOTE]
-> Akeyless now has an [official AzDO Task](https://docs.akeyless.io/docs/akeyless-azure-devops-extension)! I am 100% committed to maintaining this one because a lot of folks still rely on it, but now you have a choice for "official things only" policies 😉
+>  I am 100% committed to maintaining this task and update it weekly, but if you have an "official things only" policy, there's an [official Akeyless task](https://docs.akeyless.io/docs/akeyless-azure-devops-extension) available.
 
-## Getting Started
+## Status
+
+| Workflow | Status |
+|---|---|
+| Main | [![Main - Tests](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml) |
+| Publish Release | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg?branch=main)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml) |
+| AzDO Tester | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
+
+## Installation
 
 You can add the extension to your Azure DevOps pipeline in one of two ways:
 
 - Option 1 - Search for 'akeyless secrets' when adding a new task.
 - Option 2 - Go to [Akeyless Extensions - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=LancelotSoftware.akeyless-extensions)
+
+## Getting Started
 
 If this is your first time using the extension, please visit the documentation to have the required prerequisites prepared.
 
