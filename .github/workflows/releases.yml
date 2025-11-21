@@ -1,46 +1,50 @@
 name: 'Publish Release'
-
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "releases/*"
-    paths:
-      - 'tasks/akeyless-secrets/src/**/*'
+  # push:
+  #   branches:
+  #     - "releases/*"
+  #   paths:
+  #     - 'tasks/akeyless-secrets/src/**/*'
+
+env:
+  NODE_OPTIONS: "--max_old_space_size=4096"
+
+permissions:
+  packages: write
+  contents: write
 
 jobs:
   build-and-package:
     runs-on: windows-latest
     name: Prepare and Package
-    env:
-        NODE_OPTIONS: "--max_old_space_size=4096"
-    permissions:
-      packages: write
-      contents: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: "Prepare code & Test"
+    - name: "Prepare code & run tests"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
-      run: |
-        npm run restore
-        npm run format
-        npm run lint
-        npm run test:coverage
+      run: npm run precommit
 
     - name: "Package and publish AzDO extension"
       run: |
+        $ErrorActionPreference = 'Stop'
+
         # -1- Install CLI (https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md)
         npm i -g tfx-cli
+
         # -2- Login
-        npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token ${{secrets.MARKETPLACE_PAT}}
-        # -3- Package the extension (reminder: Do not auto-bump the version here)
+        npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token $env:MARKETPLACE_PAT
+
+        # -3- Package the extension (do NOT auto-bump the version here)
         npx tfx-cli extension create --manifest-globs ./vss-extension.json
+
         # -4- Publish to marketplace
         npx tfx extension publish
+      env:
+        MARKETPLACE_PAT: ${{secrets.MARKETPLACE_PAT}}
 
     - uses: actions/upload-artifact@v4
       name: "Attach Artifact"
