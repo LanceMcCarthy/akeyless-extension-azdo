@@ -64,7 +64,7 @@ function processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, 
     SDK.setVariable(outputPrefix, fullSecretJson, true, true);
     console.log(`✅ Output: ${outputPrefix} (complete response) => '${akeylessPath}'`);
   } catch (e) {
-    helpers.generalFail(`Processing the dynamic secret response failed. Error: ${e}`);
+    generalFail(`Processing the dynamic secret response failed. Error: ${e}`);
   }
 }
 

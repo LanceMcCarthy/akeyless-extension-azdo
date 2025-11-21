@@ -97,6 +97,22 @@ describe('secrets.js', () => {
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch one or more static secrets. Check the secret's path Error: {}.", false);
     });
+
+    test('should fail when parsed static secrets are undefined', async () => {
+      // Arrange
+      helpers.generalFail = jest.fn();
+      akeyless.GetSecretValue.constructFromObject = jest.fn();
+      const parseSpy = jest.spyOn(JSON, 'parse').mockReturnValue(undefined);
+
+      // Act
+      await secrets.getStatic(mockApi, '{"path1": "output1"}', 'test-token', 30);
+
+      // Assert
+      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of staticSecrets input. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo.');
+      expect(akeyless.GetSecretValue.constructFromObject).not.toHaveBeenCalled();
+
+      parseSpy.mockRestore();
+    });
   });
 
   describe('getDynamic', () => {
@@ -219,6 +235,22 @@ describe('secrets.js', () => {
       // Assert
       expect(mockApi.getDynamicSecretValue).not.toHaveBeenCalled();
       expect(console.log).toHaveBeenCalledWith("🔓 [Dynamic Secrets] Processing dynamic secrets... '{}'");
+    });
+
+    test('should fail when parsed dynamic secrets are undefined', async () => {
+      // Arrange
+      helpers.generalFail = jest.fn();
+      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn();
+      const parseSpy = jest.spyOn(JSON, 'parse').mockReturnValue(undefined);
+
+      // Act
+      await secrets.getDynamic(mockApi, '{"dynamic-path1": "output1"}', 'test-token', 30, 'false');
+
+      // Assert
+      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo');
+      expect(akeyless.GetDynamicSecretValue.constructFromObject).not.toHaveBeenCalled();
+
+      parseSpy.mockRestore();
     });
   });
 });

@@ -209,4 +209,57 @@ describe('index.js', () => {
       expect(akeylessApi.api).toHaveBeenCalledWith(undefined);
     });
   });
+
+  describe('executeAsMain', () => {
+    test('should call run and log debug information', () => {
+      const runSpy = jest.spyOn(index, 'run').mockResolvedValue();
+
+      index.executeAsMain();
+
+      expect(SDK.debug).toHaveBeenCalledWith('Starting main run');
+      expect(runSpy).toHaveBeenCalled();
+
+      runSpy.mockRestore();
+    });
+
+    test('should handle errors thrown during run execution', () => {
+      const error = new Error('boom');
+      const runSpy = jest.spyOn(index, 'run').mockImplementation(() => {
+        throw error;
+      });
+
+      index.executeAsMain();
+
+      expect(SDK.debug).toHaveBeenCalledWith(error.stack);
+      expect(SDK.error).toHaveBeenCalledWith(error.message);
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, error.message);
+
+      runSpy.mockRestore();
+    });
+  });
+
+  describe('autoExecuteWhenMain', () => {
+    test('should execute when module matches require.main', () => {
+      const fakeModule = {};
+      const executeSpy = jest.spyOn(index, 'executeAsMain').mockReturnValue();
+
+      index.autoExecuteWhenMain(fakeModule, fakeModule);
+
+      expect(executeSpy).toHaveBeenCalled();
+
+      executeSpy.mockRestore();
+    });
+
+    test('should not execute when module differs from require.main', () => {
+      const fakeModule = {};
+      const anotherModule = {};
+      const executeSpy = jest.spyOn(index, 'executeAsMain').mockReturnValue();
+
+      index.autoExecuteWhenMain(fakeModule, anotherModule);
+
+      expect(executeSpy).not.toHaveBeenCalled();
+
+      executeSpy.mockRestore();
+    });
+  });
 });

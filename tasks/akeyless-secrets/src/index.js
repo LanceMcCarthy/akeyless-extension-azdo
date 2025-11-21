@@ -37,15 +37,27 @@ async function run() {
   }
 }
 
-exports.run = run;
-
-if (require.main === module) {
+function executeAsMain() {
   try {
     SDK.debug('Starting main run');
-    run();
+    return module.exports.run();
   } catch (e) {
     SDK.debug(e.stack);
     SDK.error(e.message);
     SDK.setResult(SDK.TaskResult.Failed, e.message);
   }
 }
+
+function autoExecuteWhenMain(entryModule = module, mainModule = require.main) {
+  if (mainModule === entryModule) {
+    module.exports.executeAsMain();
+  }
+}
+
+module.exports = {
+  run,
+  executeAsMain,
+  autoExecuteWhenMain
+};
+
+autoExecuteWhenMain();

@@ -145,6 +145,26 @@ describe('helpers.js', () => {
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_simple_key', 'simple_value', true, true);
     });
 
+    test('should handle JSON primitive string values when autogenerate is enabled', () => {
+      // Arrange
+      const akeylessPath = '/dynamic/secret';
+      const outputPrefix = 'myOutput';
+      const secretResult = {
+        number_value: '42',
+        bool_value: 'true'
+      };
+      const autogenerate = 'true';
+
+      // Act
+      helpers.processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, autogenerate);
+
+      // Assert
+      expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_number_value', '42', true, true);
+      expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_bool_value', 'true', true, true);
+      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_number_value => 42. (parsed JSON primitive)');
+      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_bool_value => true. (parsed JSON primitive)');
+    });
+
     test('should handle null and undefined values', () => {
       // Arrange
       const akeylessPath = '/dynamic/secret';
@@ -165,6 +185,21 @@ describe('helpers.js', () => {
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_valid_value', 'test', true, true);
       expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_null_value => . (⚠️ empty ⚠️ This was null/undefined.)');
       expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_undefined_value => . (⚠️ empty ⚠️ This was null/undefined.)');
+    });
+
+    test('should fail gracefully when processing throws', () => {
+      // Arrange
+      const akeylessPath = '/dynamic/secret';
+      const outputPrefix = 'myOutput';
+      const secretResult = {};
+      secretResult.self = secretResult; // creates circular reference for JSON.stringify
+      const autogenerate = 'false';
+
+      // Act
+      helpers.processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, autogenerate);
+
+      // Assert
+      expect(SDK.setResult).toHaveBeenCalledWith('Failed', expect.stringContaining('Processing the dynamic secret response failed.'), true);
     });
   });
 
