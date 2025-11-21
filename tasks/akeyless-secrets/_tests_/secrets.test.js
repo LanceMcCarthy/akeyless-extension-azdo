@@ -76,7 +76,7 @@ describe('secrets.js', () => {
       await secrets.getStatic(mockApi, invalidJsonSecrets, akeylessToken, timeout);
 
       // Assert
-      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of staticSecrets input: SyntaxError: Unexpected token \'i\', \"invalid-json\" is not valid JSON. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo.');
+      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of staticSecrets input: SyntaxError: Unexpected token \'i\', "invalid-json" is not valid JSON. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo.');
     });
 
     test('should handle API error for static secrets', async () => {
@@ -199,7 +199,7 @@ describe('secrets.js', () => {
       await secrets.getDynamic(mockApi, invalidJsonSecrets, akeylessToken, timeout, autogenerate);
 
       // Assert
-      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo');
+      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of dynamicSecrets input: SyntaxError: Unexpected token \'i\', "invalid-json" is not valid JSON. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo');
     });
 
     test('should handle API error for dynamic secrets', async () => {
