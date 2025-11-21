@@ -19,7 +19,7 @@ describe('index.js', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     console.log = jest.fn(); // Mock console.log
-    
+
     mockApi = {
       auth: jest.fn(),
       getSecretValue: jest.fn(),
@@ -32,7 +32,7 @@ describe('index.js', () => {
     secrets.getStatic = jest.fn().mockResolvedValue();
     secrets.getDynamic = jest.fn().mockResolvedValue();
     helpers.generalFail = jest.fn();
-    
+
     SDK.debug = jest.fn();
     SDK.error = jest.fn();
     SDK.setResult = jest.fn();
@@ -65,9 +65,7 @@ describe('index.js', () => {
       expect(auth.getAkeylessToken).toHaveBeenCalledWith(mockApi, mockInputs.accessId, mockInputs.azureJwt);
       expect(secrets.getStatic).toHaveBeenCalledWith(mockApi, mockInputs.staticSecrets, 'test-token', mockInputs.requestTimeout);
       expect(secrets.getDynamic).toHaveBeenCalledWith(mockApi, mockInputs.dynamicSecrets, 'test-token', mockInputs.requestTimeout, mockInputs.autogenerate);
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('🔔 Important Reminder: To reference a task\'s outputs')
-      );
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("🔔 Important Reminder: To reference a task's outputs"));
     });
 
     test('should handle only static secrets', async () => {
@@ -160,9 +158,7 @@ describe('index.js', () => {
       await index.run();
 
       // Assert
-      expect(helpers.generalFail).toHaveBeenCalledWith(
-        'Unexpected failure. The akeyless token is empty even though you\'re authenticated, please double check the inputs or open an issue at https://github.com/LanceMcCarthy/akeyless-extension-azdo.'
-      );
+      expect(helpers.generalFail).toHaveBeenCalledWith("Unexpected failure. The akeyless token is empty even though you're authenticated, please double check the inputs or open an issue at https://github.com/LanceMcCarthy/akeyless-extension-azdo.");
       // The code continues executing even after generalFail is called
       expect(secrets.getStatic).toHaveBeenCalledWith(mockApi, mockInputs.staticSecrets, undefined, mockInputs.requestTimeout);
       expect(secrets.getDynamic).toHaveBeenCalledWith(mockApi, mockInputs.dynamicSecrets, undefined, mockInputs.requestTimeout, mockInputs.autogenerate);
@@ -193,7 +189,7 @@ describe('index.js', () => {
     });
 
     test('should use default API URL when not provided', async () => {
-      // Arrange  
+      // Arrange
       const mockInputs = {
         accessId: 'p-test-id',
         azureJwt: 'test-jwt',
@@ -211,6 +207,59 @@ describe('index.js', () => {
 
       // Assert
       expect(akeylessApi.api).toHaveBeenCalledWith(undefined);
+    });
+  });
+
+  describe('executeAsMain', () => {
+    test('should call run and log debug information', () => {
+      const runSpy = jest.spyOn(index, 'run').mockResolvedValue();
+
+      index.executeAsMain();
+
+      expect(SDK.debug).toHaveBeenCalledWith('Starting main run');
+      expect(runSpy).toHaveBeenCalled();
+
+      runSpy.mockRestore();
+    });
+
+    test('should handle errors thrown during run execution', () => {
+      const error = new Error('boom');
+      const runSpy = jest.spyOn(index, 'run').mockImplementation(() => {
+        throw error;
+      });
+
+      index.executeAsMain();
+
+      expect(SDK.debug).toHaveBeenCalledWith(error.stack);
+      expect(SDK.error).toHaveBeenCalledWith(error.message);
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, error.message);
+
+      runSpy.mockRestore();
+    });
+  });
+
+  describe('autoExecuteWhenMain', () => {
+    test('should execute when module matches require.main', () => {
+      const fakeModule = {};
+      const executeSpy = jest.spyOn(index, 'executeAsMain').mockReturnValue();
+
+      index.autoExecuteWhenMain(fakeModule, fakeModule);
+
+      expect(executeSpy).toHaveBeenCalled();
+
+      executeSpy.mockRestore();
+    });
+
+    test('should not execute when module differs from require.main', () => {
+      const fakeModule = {};
+      const anotherModule = {};
+      const executeSpy = jest.spyOn(index, 'executeAsMain').mockReturnValue();
+
+      index.autoExecuteWhenMain(fakeModule, anotherModule);
+
+      expect(executeSpy).not.toHaveBeenCalled();
+
+      executeSpy.mockRestore();
     });
   });
 });
