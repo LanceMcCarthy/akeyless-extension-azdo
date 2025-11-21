@@ -29,8 +29,8 @@
   "author": "Lance McCarthy",
   "license": "ISC",
   "dependencies": {
-    "akeyless": "^5.0.8",
-    "azure-pipelines-task-lib": "^5.2.0"
+    "akeyless": "^5.0.14",
+    "azure-pipelines-task-lib": "^5.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
