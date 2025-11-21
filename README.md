@@ -1,6 +1,4 @@
-# AKeyless Extension for Azure DevOps - 
-
-
+# AKeyless Extension for Azure DevOps 
 
 Use this Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault. The task will login to AKeyless using Azure service connection JWT authentication and then fetch static secrets or a dynamic secret producer.
 
@@ -15,15 +13,15 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
     - [Plain Output](#plain-output) ([examples](#simple-output-examples))
   - [Support](#support)
  
->  I am 100% committed to maintaining this task and update it weekly, but if you have an "official things only" policy, there's an [official Akeyless task](https://docs.akeyless.io/docs/akeyless-azure-devops-extension) available.
+>  I am 100% committed to maintaining this and update it monthly, however I should mention that Akeyless now has their own, see [Akeyless AzDO Extension](https://docs.akeyless.io/docs/akeyless-azure-devops-extension).
 
 ## Status
 
 | Workflow | Status |
 |---|---|
 | Main | [![Main - Tests](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml) |
-| Publish Release | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg?branch=main)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml) |
-| AzDO Tester | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
+| Publish | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml) |
+| Real AzDO Run | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
 
 ## Installation
 
