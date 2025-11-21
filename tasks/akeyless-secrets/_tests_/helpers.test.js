@@ -7,7 +7,7 @@ describe('helpers.js', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     console.log = jest.fn(); // Mock console.log
-    
+
     // Setup SDK mocks
     SDK.setVariable = jest.fn();
     SDK.setResult = jest.fn();
@@ -177,11 +177,7 @@ describe('helpers.js', () => {
       helpers.generalFail(errorMessage);
 
       // Assert
-      expect(SDK.setResult).toHaveBeenCalledWith(
-        SDK.TaskResult.Failed,
-        `❌ ${errorMessage}`,
-        true
-      );
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, `❌ ${errorMessage}`, true);
     });
   });
 });

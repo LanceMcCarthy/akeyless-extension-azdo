@@ -13,7 +13,7 @@ describe('secrets.js', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     console.log = jest.fn(); // Mock console.log
-    
+
     // Setup default mock API
     mockApi = {
       getSecretValue: jest.fn(),
@@ -34,8 +34,8 @@ describe('secrets.js', () => {
       const akeylessToken = 'test-token';
       const timeout = 30;
       const mockSecretResult = {
-        'path1': 'secret-value-1',
-        'path2': 'secret-value-2'
+        path1: 'secret-value-1',
+        path2: 'secret-value-2'
       };
 
       const mockStaticOpts = {
@@ -58,16 +58,11 @@ describe('secrets.js', () => {
         timeout: timeout
       });
       expect(mockApi.getSecretValue).toHaveBeenCalledWith(mockStaticOpts);
-      
+
       // Wait for promise resolution
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(helpers.processStaticSecretResponse).toHaveBeenCalledWith(
-        { 'path1': 'output1', 'path2': 'output2' },
-        mockSecretResult
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        "🔓[Static Secrets] Processing static secrets... '{\"path1\": \"output1\", \"path2\": \"output2\"}'"
-      );
+      expect(helpers.processStaticSecretResponse).toHaveBeenCalledWith({path1: 'output1', path2: 'output2'}, mockSecretResult);
+      expect(console.log).toHaveBeenCalledWith('🔓[Static Secrets] Processing static secrets... \'{"path1": "output1", "path2": "output2"}\'');
     });
 
     test('should handle invalid JSON in staticSecrets', async () => {
@@ -81,9 +76,7 @@ describe('secrets.js', () => {
       await secrets.getStatic(mockApi, invalidJsonSecrets, akeylessToken, timeout);
 
       // Assert
-      expect(helpers.generalFail).toHaveBeenCalledWith(
-        'Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo'
-      );
+      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo');
     });
 
     test('should handle API error for static secrets', async () => {
@@ -102,11 +95,7 @@ describe('secrets.js', () => {
       // Assert
       // Wait for promise rejection
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(SDK.setResult).toHaveBeenCalledWith(
-        SDK.TaskResult.Failed,
-        'Could not fetch one or more static secrets. Check the secret\'s path Error: {}.',
-        false
-      );
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch one or more static secrets. Check the secret's path Error: {}.", false);
     });
   });
 
@@ -144,18 +133,11 @@ describe('secrets.js', () => {
         json: true
       });
       expect(mockApi.getDynamicSecretValue).toHaveBeenCalledWith(mockDynamicOpts);
-      
+
       // Wait for promise resolution
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith(
-        'dynamic-path1',
-        'output1',
-        mockDynamicResult,
-        autogenerate
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        "🔓 [Dynamic Secrets] Processing dynamic secrets... '{\"dynamic-path1\": \"output1\", \"dynamic-path2\": \"output2\"}'"
-      );
+      expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith('dynamic-path1', 'output1', mockDynamicResult, autogenerate);
+      expect(console.log).toHaveBeenCalledWith('🔓 [Dynamic Secrets] Processing dynamic secrets... \'{"dynamic-path1": "output1", "dynamic-path2": "output2"}\'');
       expect(console.log).toHaveBeenCalledWith("Fetching 'dynamic-path1'...");
     });
 
@@ -165,18 +147,14 @@ describe('secrets.js', () => {
       const akeylessToken = 'test-token';
       const timeout = 30;
       const autogenerate = 'false';
-      
-      const mockResult1 = { key1: 'value1' };
-      const mockResult2 = { key2: 'value2' };
 
-      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn()
-        .mockReturnValueOnce({ token: akeylessToken, name: 'dynamic-path1', timeout, json: true })
-        .mockReturnValueOnce({ token: akeylessToken, name: 'dynamic-path2', timeout, json: true });
-      
-      mockApi.getDynamicSecretValue
-        .mockResolvedValueOnce(mockResult1)
-        .mockResolvedValueOnce(mockResult2);
-      
+      const mockResult1 = {key1: 'value1'};
+      const mockResult2 = {key2: 'value2'};
+
+      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn().mockReturnValueOnce({token: akeylessToken, name: 'dynamic-path1', timeout, json: true}).mockReturnValueOnce({token: akeylessToken, name: 'dynamic-path2', timeout, json: true});
+
+      mockApi.getDynamicSecretValue.mockResolvedValueOnce(mockResult1).mockResolvedValueOnce(mockResult2);
+
       helpers.processDynamicSecretResponse = jest.fn();
 
       // Act
@@ -185,16 +163,12 @@ describe('secrets.js', () => {
       // Assert
       expect(akeyless.GetDynamicSecretValue.constructFromObject).toHaveBeenCalledTimes(2);
       expect(mockApi.getDynamicSecretValue).toHaveBeenCalledTimes(2);
-      
+
       // Wait for all promises to resolve
       await new Promise(resolve => setTimeout(resolve, 0));
-      
-      expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith(
-        'dynamic-path1', 'output1', mockResult1, autogenerate
-      );
-      expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith(
-        'dynamic-path2', 'output2', mockResult2, autogenerate
-      );
+
+      expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith('dynamic-path1', 'output1', mockResult1, autogenerate);
+      expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith('dynamic-path2', 'output2', mockResult2, autogenerate);
     });
 
     test('should handle invalid JSON in dynamicSecrets', async () => {
@@ -209,9 +183,7 @@ describe('secrets.js', () => {
       await secrets.getDynamic(mockApi, invalidJsonSecrets, akeylessToken, timeout, autogenerate);
 
       // Assert
-      expect(helpers.generalFail).toHaveBeenCalledWith(
-        'Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo'
-      );
+      expect(helpers.generalFail).toHaveBeenCalledWith('Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo');
     });
 
     test('should handle API error for dynamic secrets', async () => {
@@ -231,11 +203,7 @@ describe('secrets.js', () => {
       // Assert
       // Wait for promise rejection
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(SDK.setResult).toHaveBeenCalledWith(
-        SDK.TaskResult.Failed,
-        'Could not fetch \'dynamic-path1\'. Error: {}.',
-        false
-      );
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch 'dynamic-path1'. Error: {}.", false);
     });
 
     test('should handle empty dynamic secrets object', async () => {
@@ -250,9 +218,7 @@ describe('secrets.js', () => {
 
       // Assert
       expect(mockApi.getDynamicSecretValue).not.toHaveBeenCalled();
-      expect(console.log).toHaveBeenCalledWith(
-        "🔓 [Dynamic Secrets] Processing dynamic secrets... '{}'"
-      );
+      expect(console.log).toHaveBeenCalledWith("🔓 [Dynamic Secrets] Processing dynamic secrets... '{}'");
     });
   });
 });

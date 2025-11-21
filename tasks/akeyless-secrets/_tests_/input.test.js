@@ -11,7 +11,8 @@ describe('input.js', () => {
   describe('readInputs', () => {
     test('should read all inputs correctly with required parameters', () => {
       // Arrange
-      SDK.getInput = jest.fn()
+      SDK.getInput = jest
+        .fn()
         .mockReturnValueOnce('p-test-access-id') // accessId
         .mockReturnValueOnce('test-jwt-token') // azureJwt
         .mockReturnValueOnce('https://api.akeyless.io') // apiUrl
@@ -45,7 +46,8 @@ describe('input.js', () => {
 
     test('should handle empty optional inputs', () => {
       // Arrange
-      SDK.getInput = jest.fn()
+      SDK.getInput = jest
+        .fn()
         .mockReturnValueOnce('p-test-access-id') // accessId
         .mockReturnValueOnce('test-jwt-token') // azureJwt
         .mockReturnValueOnce('') // apiUrl - empty
@@ -71,7 +73,8 @@ describe('input.js', () => {
 
     test('should handle null values', () => {
       // Arrange
-      SDK.getInput = jest.fn()
+      SDK.getInput = jest
+        .fn()
         .mockReturnValueOnce('p-test-access-id') // accessId
         .mockReturnValueOnce('test-jwt-token') // azureJwt
         .mockReturnValueOnce(null) // apiUrl - null
@@ -97,7 +100,8 @@ describe('input.js', () => {
 
     test('should handle only required inputs provided', () => {
       // Arrange
-      SDK.getInput = jest.fn()
+      SDK.getInput = jest
+        .fn()
         .mockReturnValueOnce('p-minimal-access-id') // accessId
         .mockReturnValueOnce('minimal-jwt-token') // azureJwt
         .mockReturnValueOnce(undefined) // apiUrl
@@ -130,7 +134,8 @@ describe('input.js', () => {
         '/another/dynamic/path': 'another_output'
       });
 
-      SDK.getInput = jest.fn()
+      SDK.getInput = jest
+        .fn()
         .mockReturnValueOnce('p-complex-id') // accessId
         .mockReturnValueOnce('complex-jwt') // azureJwt
         .mockReturnValueOnce('https://custom.akeyless.io') // apiUrl

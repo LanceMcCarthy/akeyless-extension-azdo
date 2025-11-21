@@ -15,7 +15,7 @@ describe('akeyless_api.js', () => {
         basePath: ''
       };
       const mockV2Api = {};
-      
+
       akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
       akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
 
@@ -37,7 +37,7 @@ describe('akeyless_api.js', () => {
         basePath: ''
       };
       const mockV2Api = {};
-      
+
       akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
       akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
 
@@ -59,7 +59,7 @@ describe('akeyless_api.js', () => {
         basePath: ''
       };
       const mockV2Api = {};
-      
+
       akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
       akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
 
@@ -79,7 +79,7 @@ describe('akeyless_api.js', () => {
         basePath: ''
       };
       const mockV2Api = {};
-      
+
       akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
       akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
 
