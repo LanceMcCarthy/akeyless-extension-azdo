@@ -1,5 +1,4 @@
 const SDK = require('azure-pipelines-task-lib/task');
-const akeyless = require('akeyless');
 const helpers = require('./helpers');
 const akeylessApi = require('./akeyless_api');
 const auth = require('./auth');

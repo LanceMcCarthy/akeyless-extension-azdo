@@ -12,12 +12,12 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
   try {
     staticSecretsDictionary = JSON.parse(staticSecrets);
   } catch (error) {
-    helpers.generalFail(`Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
+    helpers.generalFail(`Something went wrong during deserialization of staticSecrets input: ${error}. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo.`);
     return;
   }
 
   if (staticSecretsDictionary === undefined) {
-    helpers.generalFail(`Something went wrong during deserialization of staticSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
+    helpers.generalFail(`Something went wrong during deserialization of staticSecrets input: ${error}. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo.`);
   }
 
   // GET STATIC SECRETS
