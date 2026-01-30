@@ -42,7 +42,7 @@ jobs:
         npx tfx-cli extension create --manifest-globs ./vss-extension.json
 
         # -4- Publish to marketplace
-        npx tfx extension publish
+        npx tfx extension publish --vsix LancelotSoftware.akeyless-extensions-*.vsix
       env:
         MARKETPLACE_PAT: ${{secrets.MARKETPLACE_PAT}}
 
