@@ -41,8 +41,15 @@ jobs:
         # -3- Package the extension (do NOT auto-bump the version here)
         npx tfx-cli extension create --manifest-globs ./vss-extension.json
 
-        # -4- Publish to marketplace
-        npx tfx extension publish --vsix LancelotSoftware.akeyless-extensions-*.vsix
+        # -4- Find the path to the vsix
+        $vsixFile = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "LancelotSoftware.akeyless-extensions-*.vsix" -Recurse -File | Select-Object -First 1
+        if (-not $vsixFile) {
+          throw "VSIX file not found in workspace"
+        }
+        Write-Host "Found VSIX file at: $($vsixFile.FullName)"
+
+        # -5- Publish to marketplace
+        npx tfx extension publish --vsix "$($vsixFile.FullName)"
       env:
         MARKETPLACE_PAT: ${{secrets.MARKETPLACE_PAT}}
 
