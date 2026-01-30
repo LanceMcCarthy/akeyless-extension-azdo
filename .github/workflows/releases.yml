@@ -1,11 +1,11 @@
 name: 'Publish Release'
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - "releases/*"
-  #   paths:
-  #     - 'tasks/akeyless-secrets/src/**/*'
+  push:
+    branches:
+      - "releases/*"
+    paths:
+      - 'tasks/akeyless-secrets/src/**/*'
 
 env:
   NODE_OPTIONS: "--max_old_space_size=4096"
