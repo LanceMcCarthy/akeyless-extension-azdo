@@ -5,7 +5,7 @@ on:
     branches:
       - "releases/*"
     paths:
-      - 'tasks/akeyless-secrets/src/**/*'
+      - 'tasks/akeyless-secrets/**/*'
 
 env:
   NODE_OPTIONS: "--max_old_space_size=4096"
@@ -32,26 +32,27 @@ jobs:
       run: |
         $ErrorActionPreference = 'Stop'
 
-        # -1- Install CLI (https://github.com/microsoft/tfs-cli/blob/master/docs/extensions.md)
+        # -1- Install VSX CLI
         npm i -g tfx-cli
 
-        # -2- Login
-        npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token $env:MARKETPLACE_PAT
+        # -2- Login to VSX marketplace
+        npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token ${{secrets.MARKETPLACE_PAT}}
 
-        # -3- Package the extension (do NOT auto-bump the version here)
+        # -3- Package the extension
+        # REMINDER: Do NOT auto-bump the version here, it is already set in the branch being published.
         npx tfx-cli extension create --manifest-globs ./vss-extension.json
 
         # -4- Find the path to the vsix
         $vsixFile = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "LancelotSoftware.akeyless-extensions-*.vsix" -Recurse -File | Select-Object -First 1
+        
         if (-not $vsixFile) {
-          throw "VSIX file not found in workspace"
+          throw "VSIX file not found in workspace, cancelling publish."
         }
+
         Write-Host "Found VSIX file at: $($vsixFile.FullName)"
 
-        # -5- Publish to marketplace (token must be passed directly to publish command)
-        npx tfx extension publish --vsix "$($vsixFile.FullName)" --token $env:MARKETPLACE_PAT --auth-type pat
-      env:
-        MARKETPLACE_PAT: ${{secrets.MARKETPLACE_PAT}}
+        # -5- Publish to marketplace
+        npx tfx extension publish --vsix "$($vsixFile.FullName)" --token ${{secrets.MARKETPLACE_PAT}} --auth-type pat
 
     - uses: actions/upload-artifact@v4
       name: "Attach Artifact"
