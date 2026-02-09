@@ -20,8 +20,8 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
 | Workflow | Status |
 |---|---|
 | Main | [![Main - Tests](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml) |
-| Publish | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml) |
-| Real AzDO Run | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
+| Publish | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg)](https://dev.azure.com/lance/DevOps%20Examples/_build?definitionId=82&_a=summary) |
+| Proof Pipeline | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
 
 ## Installation
 
