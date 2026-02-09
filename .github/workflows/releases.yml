@@ -48,8 +48,8 @@ jobs:
         }
         Write-Host "Found VSIX file at: $($vsixFile.FullName)"
 
-        # -5- Publish to marketplace
-        npx tfx extension publish --vsix "$($vsixFile.FullName)"
+        # -5- Publish to marketplace (token must be passed directly to publish command)
+        npx tfx extension publish --vsix "$($vsixFile.FullName)" --token $env:MARKETPLACE_PAT --auth-type pat
       env:
         MARKETPLACE_PAT: ${{secrets.MARKETPLACE_PAT}}
 
