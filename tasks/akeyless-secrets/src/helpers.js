@@ -1,5 +1,31 @@
 const SDK = require('azure-pipelines-task-lib/task');
 
+function setSecretOutputVariable(variableName, variableValue, isOutput = true) {
+  const value = variableValue === undefined || variableValue === null ? '' : String(variableValue);
+  const includesNewline = /\r|\n/.test(value);
+  const currentAllowMultilineValue = `${process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET}`.toUpperCase();
+  const shouldTemporarilyAllowMultiline = includesNewline && currentAllowMultilineValue !== 'TRUE';
+  const hadEnvValue = Object.prototype.hasOwnProperty.call(process.env, 'SYSTEM_UNSAFEALLOWMULTILINESECRET');
+  const previousEnvValue = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+
+  try {
+    if (shouldTemporarilyAllowMultiline) {
+      // Scope multiline-secret allowance to this variable set only.
+      process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = 'TRUE';
+    }
+
+    SDK.setVariable(variableName, value, true, isOutput);
+  } finally {
+    if (shouldTemporarilyAllowMultiline) {
+      if (hadEnvValue) {
+        process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = previousEnvValue;
+      } else {
+        delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      }
+    }
+  }
+}
+
 function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
   // getSecretValue => secretResult: is a dictionary of key/value pairs of akeyless-path:secret-value. iterate over the returned dictionary of all static secrets
   for (const [akeylessPath, secret] of Object.entries(secretResult)) {
@@ -10,7 +36,7 @@ function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
       continue;
     }
 
-    SDK.setVariable(outputName, secret, true, true);
+    setSecretOutputVariable(outputName, secret, true);
     console.log(`✅ '${akeylessPath}' => output: ${outputName}, value: ${secret}`);
   }
 }
@@ -61,7 +87,7 @@ function processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, 
 
     // PART 2 - For backwards compatibility, I still set complete object as the main output variable (as JSON string)
     const fullSecretJson = JSON.stringify(secretResult);
-    SDK.setVariable(outputPrefix, fullSecretJson, true, true);
+    setSecretOutputVariable(outputPrefix, fullSecretJson, true);
     console.log(`✅ Output: ${outputPrefix} (complete response) => '${akeylessPath}'`);
   } catch (e) {
     generalFail(`Processing the dynamic secret response failed. Error: ${e}`);
@@ -71,7 +97,7 @@ function processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, 
 function setAutoGenOutput(prefix, propName, value, extraLogMessage) {
   // Use the developer's output name as the top prefix, this avoids overwrites if multiple secrets have the same keys.
   const variableName = `${prefix}_${propName}`;
-  SDK.setVariable(variableName, value, true, true);
+  setSecretOutputVariable(variableName, value, true);
   console.log(`✅ Output: ${variableName} => ${value}. ${extraLogMessage || ''}`);
 }
 
