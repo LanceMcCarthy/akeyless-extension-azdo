@@ -110,6 +110,31 @@ Notice how we are using the `azure_jwt` output from the AzureCLI task to hold th
 
 You will have `$(MyAkeylessTask.firstSecret)` and  `$(MyAkeylessTask.secondSecret)` available in subsequent tasks of that job.
 
+#### Multiline Example
+
+Using a multiline static secret like an RSA/PEM private key can be used to directly write to a file
+
+```yaml
+- task: akeyless-secrets@1
+  name: 'MyAkeylessTask'
+  displayName: 'Get RSA key from Akeyless'
+  inputs:
+    accessid: 'p-123456'
+    azureJwt: '$(AzureCLI.azure_jwt)'
+    staticSecrets: '{"/WebComponents/prod/github-automation/APP_PRIVATE_KEY":"appPrivateKey"}'
+
+- bash: |
+    # Write the multiline key exactly as received.
+    cat > app-private-key.pem <<'EOF'
+    $APP_PRIVATE_KEY
+    EOF
+    chmod 600 app-private-key.pem
+    wc -l app-private-key.pem
+  displayName: 'Use multiline RSA key'
+  env:
+    APP_PRIVATE_KEY: $(MyAkeylessTask.appPrivateKey)
+```
+
 ## Dynamic Secrets
 
 For dynamic secrets, the outputs are available as both individual outputs and the entire value.
