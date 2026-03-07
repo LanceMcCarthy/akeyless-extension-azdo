@@ -57,6 +57,42 @@ describe('helpers.js', () => {
       expect(SDK.setVariable).toHaveBeenCalledTimes(1); // Only called for non-undefined value
       expect(console.log).toHaveBeenCalledWith("⚠️ [Warning] '/path/secret2' has no value, please verify the secret is properly configured in akeyless.");
     });
+
+    test('should allow multiline static secrets without requiring pipeline env changes', () => {
+      // Arrange
+      const originalAllowMultiline = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+
+      SDK.setVariable = jest.fn((name, value, secret, isOutput) => {
+        expect(name).toBe('privateKeyOutput');
+        expect(value).toBe('line1\nline2');
+        expect(secret).toBe(true);
+        expect(isOutput).toBe(true);
+        expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBe('TRUE');
+      });
+
+      const staticSecretsDictionary = {
+        '/path/private-key': 'privateKeyOutput'
+      };
+      const secretResult = {
+        '/path/private-key': 'line1\nline2'
+      };
+
+      try {
+        // Act
+        helpers.processStaticSecretResponse(staticSecretsDictionary, secretResult);
+
+        // Assert
+        expect(SDK.setVariable).toHaveBeenCalledTimes(1);
+        expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBeUndefined();
+      } finally {
+        if (originalAllowMultiline !== undefined) {
+          process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = originalAllowMultiline;
+        } else {
+          delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+        }
+      }
+    });
   });
 
   describe('processDynamicSecretResponse', () => {
