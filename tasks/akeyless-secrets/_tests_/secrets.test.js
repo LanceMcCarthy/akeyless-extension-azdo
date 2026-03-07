@@ -62,7 +62,7 @@ describe('secrets.js', () => {
       // Wait for promise resolution
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(helpers.processStaticSecretResponse).toHaveBeenCalledWith({path1: 'output1', path2: 'output2'}, mockSecretResult);
-      expect(console.log).toHaveBeenCalledWith('🔓[Static Secrets] Processing static secrets... \'{"path1": "output1", "path2": "output2"}\'');
+      expect(console.log).toHaveBeenCalledWith('🔓 [Static Secrets] Processing 2 static secret request(s)...');
     });
 
     test('should handle invalid JSON in staticSecrets', async () => {
@@ -153,7 +153,7 @@ describe('secrets.js', () => {
       // Wait for promise resolution
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(helpers.processDynamicSecretResponse).toHaveBeenCalledWith('dynamic-path1', 'output1', mockDynamicResult, autogenerate);
-      expect(console.log).toHaveBeenCalledWith('🔓 [Dynamic Secrets] Processing dynamic secrets... \'{"dynamic-path1": "output1", "dynamic-path2": "output2"}\'');
+      expect(console.log).toHaveBeenCalledWith('🔓 [Dynamic Secrets] Processing 2 dynamic secret request(s)...');
       expect(console.log).toHaveBeenCalledWith("Fetching 'dynamic-path1'...");
     });
 
@@ -234,7 +234,7 @@ describe('secrets.js', () => {
 
       // Assert
       expect(mockApi.getDynamicSecretValue).not.toHaveBeenCalled();
-      expect(console.log).toHaveBeenCalledWith("🔓 [Dynamic Secrets] Processing dynamic secrets... '{}'");
+      expect(console.log).toHaveBeenCalledWith('🔓 [Dynamic Secrets] Processing 0 dynamic secret request(s)...');
     });
 
     test('should fail when parsed dynamic secrets are undefined', async () => {

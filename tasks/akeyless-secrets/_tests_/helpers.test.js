@@ -34,8 +34,8 @@ describe('helpers.js', () => {
       // Assert
       expect(SDK.setVariable).toHaveBeenCalledWith('output1', 'secret-value-1', true, true);
       expect(SDK.setVariable).toHaveBeenCalledWith('output2', 'secret-value-2', true, true);
-      expect(console.log).toHaveBeenCalledWith("✅ '/path/secret1' => output: output1, value: secret-value-1");
-      expect(console.log).toHaveBeenCalledWith("✅ '/path/secret2' => output: output2, value: secret-value-2");
+      expect(console.log).toHaveBeenCalledWith("✅ '/path/secret1' => output: output1 (secret value redacted)");
+      expect(console.log).toHaveBeenCalledWith("✅ '/path/secret2' => output: output2 (secret value redacted)");
     });
 
     test('should handle undefined secret values with warning', () => {
@@ -261,8 +261,8 @@ vp2PSQ3Hm+TnwqIENf5hgbbSun123Tjw8wrpM6zczcmKwUbV0h6/
       // Assert
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_number_value', '42', true, true);
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_bool_value', 'true', true, true);
-      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_number_value => 42. (parsed JSON primitive)');
-      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_bool_value => true. (parsed JSON primitive)');
+      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_number_value (secret value redacted). (parsed JSON primitive)');
+      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_bool_value (secret value redacted). (parsed JSON primitive)');
     });
 
     test('should handle null and undefined values', () => {
@@ -283,8 +283,8 @@ vp2PSQ3Hm+TnwqIENf5hgbbSun123Tjw8wrpM6zczcmKwUbV0h6/
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_null_value', '', true, true);
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_undefined_value', '', true, true);
       expect(SDK.setVariable).toHaveBeenCalledWith('myOutput_valid_value', 'test', true, true);
-      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_null_value => . (⚠️ empty ⚠️ This was null/undefined.)');
-      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_undefined_value => . (⚠️ empty ⚠️ This was null/undefined.)');
+      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_null_value (secret value redacted). (⚠️ empty ⚠️ This was null/undefined.)');
+      expect(console.log).toHaveBeenCalledWith('✅ Output: myOutput_undefined_value (secret value redacted). (⚠️ empty ⚠️ This was null/undefined.)');
     });
 
     test('should fail gracefully when processing throws', () => {

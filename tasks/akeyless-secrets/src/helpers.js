@@ -37,7 +37,7 @@ function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
     }
 
     setSecretOutputVariable(outputName, secret, true);
-    console.log(`✅ '${akeylessPath}' => output: ${outputName}, value: ${secret}`);
+    console.log(`✅ '${akeylessPath}' => output: ${outputName} (secret value redacted)`);
   }
 }
 
@@ -98,7 +98,8 @@ function setAutoGenOutput(prefix, propName, value, extraLogMessage) {
   // Use the developer's output name as the top prefix, this avoids overwrites if multiple secrets have the same keys.
   const variableName = `${prefix}_${propName}`;
   setSecretOutputVariable(variableName, value, true);
-  console.log(`✅ Output: ${variableName} => ${value}. ${extraLogMessage || ''}`);
+  const details = extraLogMessage ? ` ${extraLogMessage}` : '';
+  console.log(`✅ Output: ${variableName} (secret value redacted).${details}`);
 }
 
 function generalFail(message) {

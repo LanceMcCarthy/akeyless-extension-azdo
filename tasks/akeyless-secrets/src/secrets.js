@@ -6,8 +6,6 @@ const helpers = require('./helpers');
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getSecretValue
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetSecretValue.md
 async function getStatic(api, staticSecrets, akeylessToken, timeout) {
-  console.log(`🔓[Static Secrets] Processing static secrets... '${staticSecrets}'`);
-
   let staticSecretsDictionary;
   try {
     staticSecretsDictionary = JSON.parse(staticSecrets);
@@ -20,6 +18,8 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
     helpers.generalFail(`Something went wrong during deserialization of staticSecrets input. [IMPORTANT] Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo.`);
     return;
   }
+
+  console.log(`🔓 [Static Secrets] Processing ${Object.keys(staticSecretsDictionary).length} static secret request(s)...`);
 
   // GET STATIC SECRETS
   // Get all static secrets in a single request (the GetSecretValue endpoint supports multiple names in one call).
@@ -42,8 +42,6 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getDynamicSecretValue
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetDynamicSecretValue.md
 async function getDynamic(api, dynamicSecrets, akeylessToken, timeout, autogenerate) {
-  console.log(`🔓 [Dynamic Secrets] Processing dynamic secrets... '${dynamicSecrets}'`);
-
   // Parse input
   let dynamicSecretsDictionary;
   try {
@@ -57,6 +55,8 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout, autogener
     helpers.generalFail(`Something went wrong during deserialization of dynamicSecrets input. Check the JSON string is in the format of a dictionary, see docs for examples https://github.com/LanceMcCarthy/akeyless-extension-azdo`);
     return;
   }
+
+  console.log(`🔓 [Dynamic Secrets] Processing ${Object.keys(dynamicSecretsDictionary).length} dynamic secret request(s)...`);
 
   // GET DYNAMIC SECRETS
   // GetDynamicSecretValue endpoint only supports fetching a single secret per request, so I iterate over each and fetch it.
