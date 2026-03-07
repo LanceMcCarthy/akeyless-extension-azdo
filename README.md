@@ -52,6 +52,7 @@ If this is your first time using the extension, please visit the documentation t
 > [!IMPORTANT]
 > - When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
 > - To avoid PowerShell JSON parsing errors for dynamic secrets, use an env to pass the task's outputs. See the [Processing Plain Output](#processing-plain-output) examples.
+> - Multiline secret values are supported for output variables (for example RSA/PEM private keys fetched via `staticSecrets`). When consuming multiline values in scripts, pass them through `env` and preserve line breaks.
 
 ## Outputs
 
