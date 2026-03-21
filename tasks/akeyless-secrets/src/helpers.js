@@ -3,24 +3,37 @@ const SDK = require('azure-pipelines-task-lib/task');
 function setSecretOutputVariable(variableName, variableValue, isOutput = true) {
   const value = variableValue === undefined || variableValue === null ? '' : String(variableValue);
   const includesNewline = /\r|\n/.test(value);
-  const currentAllowMultilineValue = `${process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET}`.toUpperCase();
-  const shouldTemporarilyAllowMultiline = includesNewline && currentAllowMultilineValue !== 'TRUE';
-  const hadEnvValue = Object.prototype.hasOwnProperty.call(process.env, 'SYSTEM_UNSAFEALLOWMULTILINESECRET');
-  const previousEnvValue = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+  const envKeys = ['SYSTEM_UNSAFEALLOWMULTILINESECRET', 'SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET'];
+  const isMultilineAlreadyAllowed = envKeys.some(key => `${process.env[key]}`.toUpperCase() === 'TRUE');
+  const shouldTemporarilyAllowMultiline = includesNewline && !isMultilineAlreadyAllowed;
+  const previousEnvValues = Object.fromEntries(
+    envKeys.map(key => [
+      key,
+      {
+        hadValue: Object.prototype.hasOwnProperty.call(process.env, key),
+        value: process.env[key]
+      }
+    ])
+  );
 
   try {
     if (shouldTemporarilyAllowMultiline) {
       // Scope multiline-secret allowance to this variable set only.
-      process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = 'TRUE';
+      for (const key of envKeys) {
+        process.env[key] = 'TRUE';
+      }
     }
 
     SDK.setVariable(variableName, value, true, isOutput);
   } finally {
     if (shouldTemporarilyAllowMultiline) {
-      if (hadEnvValue) {
-        process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = previousEnvValue;
-      } else {
-        delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      for (const key of envKeys) {
+        const previous = previousEnvValues[key];
+        if (previous.hadValue) {
+          process.env[key] = previous.value;
+        } else {
+          delete process.env[key];
+        }
       }
     }
   }

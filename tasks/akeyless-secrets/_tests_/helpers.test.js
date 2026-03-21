@@ -61,7 +61,9 @@ describe('helpers.js', () => {
     test('should allow multiline static secrets without requiring pipeline env changes', () => {
       // Arrange
       const originalAllowMultiline = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      const originalAllowMultilineAlt = process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
       delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      delete process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
 
       SDK.setVariable = jest.fn((name, value, secret, isOutput) => {
         expect(name).toBe('privateKeyOutput');
@@ -69,6 +71,7 @@ describe('helpers.js', () => {
         expect(secret).toBe(true);
         expect(isOutput).toBe(true);
         expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBe('TRUE');
+        expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBe('TRUE');
       });
 
       const staticSecretsDictionary = {
@@ -85,11 +88,18 @@ describe('helpers.js', () => {
         // Assert
         expect(SDK.setVariable).toHaveBeenCalledTimes(1);
         expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBeUndefined();
+        expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBeUndefined();
       } finally {
         if (originalAllowMultiline !== undefined) {
           process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = originalAllowMultiline;
         } else {
           delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+        }
+
+        if (originalAllowMultilineAlt !== undefined) {
+          process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET = originalAllowMultilineAlt;
+        } else {
+          delete process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
         }
       }
     });
@@ -97,7 +107,9 @@ describe('helpers.js', () => {
     test('should preserve RSA private key multiline value when setting static secret outputs', () => {
       // Arrange
       const originalAllowMultiline = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      const originalAllowMultilineAlt = process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
       delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      delete process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
 
       const rsaPrivateKey = `-----BEGIN RSA PRIVATE KEY-----
 8P9d61xphReeoxlOrHZLKHwri/JOiIB3/pvnTeT9gbk8lrf1wvC3CtHzS8EW+MzU
@@ -133,6 +145,7 @@ vp2PSQ3Hm+TnwqIENf5hgbbSun123Tjw8wrpM6zczcmKwUbV0h6/
         expect(secret).toBe(true);
         expect(isOutput).toBe(true);
         expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBe('TRUE');
+        expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBe('TRUE');
       });
 
       const staticSecretsDictionary = {
@@ -149,11 +162,18 @@ vp2PSQ3Hm+TnwqIENf5hgbbSun123Tjw8wrpM6zczcmKwUbV0h6/
         // Assert
         expect(SDK.setVariable).toHaveBeenCalledTimes(1);
         expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBeUndefined();
+        expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBeUndefined();
       } finally {
         if (originalAllowMultiline !== undefined) {
           process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = originalAllowMultiline;
         } else {
           delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+        }
+
+        if (originalAllowMultilineAlt !== undefined) {
+          process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET = originalAllowMultilineAlt;
+        } else {
+          delete process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
         }
       }
     });

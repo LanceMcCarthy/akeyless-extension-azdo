@@ -95,7 +95,35 @@ describe('secrets.js', () => {
       // Assert
       // Wait for promise rejection
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch one or more static secrets. Check the secret's path Error: {}.", false);
+      expect(SDK.setResult).toHaveBeenCalledWith(
+        SDK.TaskResult.Failed,
+        'Could not fetch one or more static secrets. Check secret path and access policy.',
+        false
+      );
+    });
+
+    test('should not leak secret values when static secret processing fails', async () => {
+      // Arrange
+      const staticSecrets = '{"path1": "output1"}';
+      const akeylessToken = 'test-token';
+      const timeout = 30;
+      const leakedSecret = `-----BEGIN RSA PRIVATE KEY-----\nabc123\n-----END RSA PRIVATE KEY-----`;
+
+      akeyless.GetSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      mockApi.getSecretValue.mockResolvedValue({path1: leakedSecret});
+      helpers.processStaticSecretResponse = jest.fn(() => {
+        throw new Error(`Unable to set variable with value: ${leakedSecret}`);
+      });
+
+      // Act
+      await secrets.getStatic(mockApi, staticSecrets, akeylessToken, timeout);
+
+      // Assert
+      await new Promise(resolve => setTimeout(resolve, 0));
+      const failedMessage = SDK.setResult.mock.calls[0][1];
+      expect(failedMessage).toBe('Could not fetch one or more static secrets. Check secret path and access policy.');
+      expect(failedMessage).not.toContain('BEGIN RSA PRIVATE KEY');
+      expect(failedMessage).not.toContain('abc123');
     });
 
     test('should fail when parsed static secrets are undefined', async () => {
@@ -219,7 +247,11 @@ describe('secrets.js', () => {
       // Assert
       // Wait for promise rejection
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch 'dynamic-path1'. Error: {}.", false);
+      expect(SDK.setResult).toHaveBeenCalledWith(
+        SDK.TaskResult.Failed,
+        "Could not fetch 'dynamic-path1'. Check secret path and access policy.",
+        false
+      );
     });
 
     test('should handle empty dynamic secrets object', async () => {

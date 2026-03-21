@@ -2,6 +2,21 @@ const SDK = require('azure-pipelines-task-lib/task');
 const akeyless = require('akeyless');
 const helpers = require('./helpers');
 
+function formatSafeErrorDetails(error) {
+  const statusCode = error?.statusCode || error?.response?.statusCode;
+  const errorCode = error?.code || error?.errorCode || error?.response?.body?.error_code;
+
+  const details = [];
+  if (statusCode !== undefined && statusCode !== null) {
+    details.push(`status=${statusCode}`);
+  }
+  if (errorCode) {
+    details.push(`code=${errorCode}`);
+  }
+
+  return details.length ? ` (${details.join(', ')})` : '';
+}
+
 // IMPORTANT - Uses the GetSecretValue endpoint
 // Function: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/V2Api.md#getSecretValue
 // Parameters: https://github.com/akeylesslabs/akeyless-javascript/blob/master/docs/GetSecretValue.md
@@ -34,7 +49,11 @@ async function getStatic(api, staticSecrets, akeylessToken, timeout) {
       helpers.processStaticSecretResponse(staticSecretsDictionary, secretResult);
     })
     .catch(error => {
-      SDK.setResult(SDK.TaskResult.Failed, `Could not fetch one or more static secrets. Check the secret's path Error: ${JSON.stringify(error)}.`, false);
+      SDK.setResult(
+        SDK.TaskResult.Failed,
+        `Could not fetch one or more static secrets. Check secret path and access policy${formatSafeErrorDetails(error)}.`,
+        false
+      );
     });
 }
 
@@ -78,7 +97,11 @@ async function getDynamic(api, dynamicSecrets, akeylessToken, timeout, autogener
       helpers.processDynamicSecretResponse(akeylessPath, outputVar, secretResult, autogenerate);
     })
     .catch(error => {
-      SDK.setResult(SDK.TaskResult.Failed, `Could not fetch '${akeylessPath}'. Error: ${JSON.stringify(error)}.`, false);
+      SDK.setResult(
+        SDK.TaskResult.Failed,
+        `Could not fetch '${akeylessPath}'. Check secret path and access policy${formatSafeErrorDetails(error)}.`,
+        false
+      );
     });
   }
 }
