@@ -1,0 +1,3 @@
+This repo is an Azure DevOps Task. within the /tasks folder, there are multiple subfolders, each representing a different task. Each task folder contains a task.json file that defines the task's metadata, inputs, and execution details. 
+
+In the /tasks/akeyless-secrets folder, there is a task.json file that defines the Akeyless Secrets task. It is a node-based task that allows users to retrieve secrets from Akeyless Vault and use them in their Azure DevOps pipelines. The task.json file specifies the task's name, description, inputs (such as the Akeyless Vault URL, access ID, and secret name), and the execution details (such as the script to run and the arguments to pass).
