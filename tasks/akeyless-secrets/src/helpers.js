@@ -61,9 +61,7 @@ function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
     }
 
     const {wasEncoded} = setSecretOutputVariable(outputName, secret, true);
-    const messageSuffix = wasEncoded
-      ? ` (multiline secret stored as base64; see ${outputName}_ENCODING)`
-      : ' (secret value redacted)';
+    const messageSuffix = wasEncoded ? ` (multiline secret stored as base64; see ${outputName}_ENCODING)` : ' (secret value redacted)';
     console.log(`✅ '${akeylessPath}' => output: ${outputName}${messageSuffix}`);
   }
 }
@@ -126,9 +124,7 @@ function setAutoGenOutput(prefix, propName, value, extraLogMessage) {
   const variableName = `${prefix}_${propName}`;
   const {wasEncoded} = setSecretOutputVariable(variableName, value);
   const details = extraLogMessage ? ` ${extraLogMessage}` : '';
-  const messageSuffix = wasEncoded
-    ? ` (multiline secret stored as base64; see ${variableName}_ENCODING).`
-    : ' (secret value redacted).';
+  const messageSuffix = wasEncoded ? ` (multiline secret stored as base64; see ${variableName}_ENCODING).` : ' (secret value redacted).';
   console.log(`✅ Output: ${variableName}${messageSuffix}${details}`);
 }
 
