@@ -1,7 +1,7 @@
 {
   "name": "akeyless-secrets",
   "version": "1.0.0",
-  "description": "An Azure DevOps extension to safely retrieve and use secrets from your AKeyless vault.",
+  "description": "An Azure DevOps extension to safely retrieve and use secrets from your Akeyless vault.",
   "main": "index.js",
   "scripts": {
     "restore": "npm install",
