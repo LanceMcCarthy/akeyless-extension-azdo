@@ -8,6 +8,7 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
   - [Inputs](#inputs)
   - [Reference Outputs](#outputs) ([YAML](#yaml-pipelines) or [Classic](#classic-pipelines))
   - [Static Secrets](#static-secrets)
+    - [Multiline Secrets](#multiline-secrets)
   - [Dynamic Secrets](#dynamic-secrets)
     - [Automatic Outputs](#automatic-outputs) ([examples](#automatic-output-examples))
     - [Plain Output](#plain-output) ([examples](#simple-output-examples))
@@ -110,6 +111,17 @@ Notice how we are using the `azure_jwt` output from the AzureCLI task to hold th
 
 You will have `$(MyAkeylessTask.firstSecret)` and  `$(MyAkeylessTask.secondSecret)` available in subsequent tasks of that job.
 
+### Multiline Secrets
+
+The task automatically handles secret values that contain newlines (e.g. RSA/PEM private keys, certificates). The behavior differs by agent OS:
+
+| Agent OS | Behavior |
+|----------|----------|
+| **Windows** | The original multiline value is preserved as-is. |
+| **Linux / macOS** | Azure DevOps rejects multiline secret variables, so the value is stored as a **base64-encoded** secret. An additional companion variable `<outputName>_ENCODING=base64` is emitted so you know to decode it. |
+
+This applies to both `staticSecrets` and `dynamicSecrets` — no extra configuration required.
+
 #### Multiline Example
 
 Using a multiline static secret like an RSA/PEM private key can still be written to a file. On Linux/macOS agents, decode the base64-encoded secret first.
@@ -141,7 +153,7 @@ Using a multiline static secret like an RSA/PEM private key can still be written
 
 ## Dynamic Secrets
 
-For dynamic secrets, the outputs are available as both individual outputs and the entire value.
+For dynamic secrets, the outputs are available as both individual outputs and the entire value. Multiline values within dynamic secret results are also handled automatically — see [Multiline Secrets](#multiline-secrets).
 
 - [Automatic Output](#automatic-outputs)
 - [Plain Output](#plain-output)
