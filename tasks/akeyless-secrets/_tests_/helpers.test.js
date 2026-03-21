@@ -58,6 +58,23 @@ describe('helpers.js', () => {
       expect(console.log).toHaveBeenCalledWith("⚠️ [Warning] '/path/secret2' has no value, please verify the secret is properly configured in akeyless.");
     });
 
+    test('should normalize null static secret values to empty string output', () => {
+      // Arrange
+      const staticSecretsDictionary = {
+        '/path/secret1': 'output1'
+      };
+      const secretResult = {
+        '/path/secret1': null
+      };
+
+      // Act
+      helpers.processStaticSecretResponse(staticSecretsDictionary, secretResult);
+
+      // Assert
+      expect(SDK.setVariable).toHaveBeenCalledWith('output1', '', true, true);
+      expect(console.log).toHaveBeenCalledWith("✅ '/path/secret1' => output: output1 (secret value redacted)");
+    });
+
     test('should allow multiline static secrets without requiring pipeline env changes', () => {
       // Arrange
       const originalAllowMultiline = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
@@ -162,6 +179,53 @@ vp2PSQ3Hm+TnwqIENf5hgbbSun123Tjw8wrpM6zczcmKwUbV0h6/
         // Assert
         expect(SDK.setVariable).toHaveBeenCalledTimes(1);
         expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBeUndefined();
+        expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBeUndefined();
+      } finally {
+        if (originalAllowMultiline !== undefined) {
+          process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = originalAllowMultiline;
+        } else {
+          delete process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+        }
+
+        if (originalAllowMultilineAlt !== undefined) {
+          process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET = originalAllowMultilineAlt;
+        } else {
+          delete process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
+        }
+      }
+    });
+
+    test('should restore existing multiline env var values after setting multiline static secret', () => {
+      // Arrange
+      const originalAllowMultiline = process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET;
+      const originalAllowMultilineAlt = process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
+
+      process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET = 'FALSE';
+      delete process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET;
+
+      SDK.setVariable = jest.fn((name, value, secret, isOutput) => {
+        expect(name).toBe('privateKeyOutput');
+        expect(value).toBe('line1\nline2');
+        expect(secret).toBe(true);
+        expect(isOutput).toBe(true);
+        expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBe('TRUE');
+        expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBe('TRUE');
+      });
+
+      const staticSecretsDictionary = {
+        '/path/private-key': 'privateKeyOutput'
+      };
+      const secretResult = {
+        '/path/private-key': 'line1\nline2'
+      };
+
+      try {
+        // Act
+        helpers.processStaticSecretResponse(staticSecretsDictionary, secretResult);
+
+        // Assert
+        expect(SDK.setVariable).toHaveBeenCalledTimes(1);
+        expect(process.env.SYSTEM_UNSAFEALLOWMULTILINESECRET).toBe('FALSE');
         expect(process.env.SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET).toBeUndefined();
       } finally {
         if (originalAllowMultiline !== undefined) {

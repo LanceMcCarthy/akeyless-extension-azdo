@@ -95,11 +95,25 @@ describe('secrets.js', () => {
       // Assert
       // Wait for promise rejection
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(SDK.setResult).toHaveBeenCalledWith(
-        SDK.TaskResult.Failed,
-        'Could not fetch one or more static secrets. Check secret path and access policy.',
-        false
-      );
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, 'Could not fetch one or more static secrets. Check secret path and access policy.', false);
+    });
+
+    test('should include safe status and code details for static secret API errors', async () => {
+      // Arrange
+      const staticSecrets = '{"path1": "output1"}';
+      const akeylessToken = 'test-token';
+      const timeout = 30;
+      const apiError = {statusCode: 403, code: 'FORBIDDEN'};
+
+      akeyless.GetSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      mockApi.getSecretValue.mockRejectedValue(apiError);
+
+      // Act
+      await secrets.getStatic(mockApi, staticSecrets, akeylessToken, timeout);
+
+      // Assert
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, 'Could not fetch one or more static secrets. Check secret path and access policy (status=403, code=FORBIDDEN).', false);
     });
 
     test('should not leak secret values when static secret processing fails', async () => {
@@ -247,11 +261,33 @@ describe('secrets.js', () => {
       // Assert
       // Wait for promise rejection
       await new Promise(resolve => setTimeout(resolve, 0));
-      expect(SDK.setResult).toHaveBeenCalledWith(
-        SDK.TaskResult.Failed,
-        "Could not fetch 'dynamic-path1'. Check secret path and access policy.",
-        false
-      );
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch 'dynamic-path1'. Check secret path and access policy.", false);
+    });
+
+    test('should include safe status and code details for dynamic secret API errors', async () => {
+      // Arrange
+      const dynamicSecrets = '{"dynamic-path1": "output1"}';
+      const akeylessToken = 'test-token';
+      const timeout = 30;
+      const autogenerate = 'false';
+      const apiError = {
+        response: {
+          statusCode: 500,
+          body: {
+            error_code: 'INTERNAL'
+          }
+        }
+      };
+
+      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      mockApi.getDynamicSecretValue.mockRejectedValue(apiError);
+
+      // Act
+      await secrets.getDynamic(mockApi, dynamicSecrets, akeylessToken, timeout, autogenerate);
+
+      // Assert
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(SDK.setResult).toHaveBeenCalledWith(SDK.TaskResult.Failed, "Could not fetch 'dynamic-path1'. Check secret path and access policy (status=500, code=INTERNAL).", false);
     });
 
     test('should handle empty dynamic secrets object', async () => {

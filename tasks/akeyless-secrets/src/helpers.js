@@ -110,7 +110,7 @@ function processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, 
 function setAutoGenOutput(prefix, propName, value, extraLogMessage) {
   // Use the developer's output name as the top prefix, this avoids overwrites if multiple secrets have the same keys.
   const variableName = `${prefix}_${propName}`;
-  setSecretOutputVariable(variableName, value, true);
+  setSecretOutputVariable(variableName, value);
   const details = extraLogMessage ? ` ${extraLogMessage}` : '';
   console.log(`✅ Output: ${variableName} (secret value redacted).${details}`);
 }
