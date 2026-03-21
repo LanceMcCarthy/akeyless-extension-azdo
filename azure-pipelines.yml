@@ -195,35 +195,30 @@ jobs:
 
     # Verify dynamic secret raw outputs
     - bash: |
-        import json
-        import os
-        python3 - <<'PY'
         echo "🧪 TEST 1 - Parse mySqlSecret plain output..."
-        try:
-            sql = json.loads(os.environ.get("SQL_SECRET_JSON", ""))
-            print("Available properties:", ", ".join(sql.keys()))
-            print("user:", sql.get("user"))
-            print("password:", sql.get("password"))
-            print("ttl_in_minute:", sql.get("ttl_in_minute"))
-            print("id:", sql.get("id"))
-            print("✅ Successfully parsed SQL dynamic secret JSON.")
-        except Exception as ex:
-            print(f"❌ Failed to parse SQL dynamic secret: {ex}")
+        if sql=$(jq . <<< "$SQL_SECRET_JSON" 2>/dev/null); then
+          echo "Available properties: $(jq -r 'keys | join(", ")' <<< "$sql")"
+          echo "user: $(jq -r '.user' <<< "$sql")"
+          echo "password: $(jq -r '.password' <<< "$sql")"
+          echo "ttl_in_minute: $(jq -r '.ttl_in_minute' <<< "$sql")"
+          echo "id: $(jq -r '.id' <<< "$sql")"
+          echo "✅ Successfully parsed SQL dynamic secret JSON."
+        else
+          echo "❌ Failed to parse SQL dynamic secret: Invalid JSON"
+        fi
 
-        print("🧪 TEST 2 - Parse myEntraSecret plain output...")
-        try:
-            entra = json.loads(os.environ.get("ENTRA_SECRET_JSON", ""))
-            print("Available properties:", ", ".join(entra.keys()))
-            secret = entra.get("secret", {})
-            print("keyId:", secret.get("keyId"))
-            print("appId:", secret.get("appId"))
-            print("tenantId:", secret.get("tenantId"))
-            print("secretText:", secret.get("secretText"))
-            print("endDateTime:", secret.get("endDateTime"))
-            print("✅ Successfully parsed Entra ID dynamic secret JSON.")
-        except Exception as ex:
-            print(f"❌ Failed to parse Entra dynamic secret: {ex}")
-        PY
+        echo "🧪 TEST 2 - Parse myEntraSecret plain output..."
+        if entra=$(jq . <<< "$ENTRA_SECRET_JSON" 2>/dev/null); then
+          echo "Available properties: $(jq -r 'keys | join(", ")' <<< "$entra")"
+          echo "keyId: $(jq -r '.secret.keyId' <<< "$entra")"
+          echo "appId: $(jq -r '.secret.appId' <<< "$entra")"
+          echo "tenantId: $(jq -r '.secret.tenantId' <<< "$entra")"
+          echo "secretText: $(jq -r '.secret.secretText' <<< "$entra")"
+          echo "endDateTime: $(jq -r '.secret.endDateTime' <<< "$entra")"
+          echo "✅ Successfully parsed Entra ID dynamic secret JSON."
+        else
+          echo "❌ Failed to parse Entra dynamic secret: Invalid JSON"
+        fi
       displayName: '[Dynamic] Parse full outputs.'
       env:
         # IMPORTANT: See caution note https://github.com/LanceMcCarthy/akeyless-extension-azdo?tab=readme-ov-file#plain-output
