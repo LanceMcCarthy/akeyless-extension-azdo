@@ -1,11 +1,14 @@
 const SDK = require('azure-pipelines-task-lib/task');
+const os = require('os');
 
 function setSecretOutputVariable(variableName, variableValue, isOutput = true) {
   const value = variableValue === undefined || variableValue === null ? '' : String(variableValue);
   const includesNewline = /\r|\n/.test(value);
+  const shouldEncodeForPlatformCompatibility = includesNewline && os.platform() !== 'win32';
+  const outputValue = shouldEncodeForPlatformCompatibility ? Buffer.from(value, 'utf8').toString('base64') : value;
   const envKeys = ['SYSTEM_UNSAFEALLOWMULTILINESECRET', 'SYSTEM_UNSAFE_ALLOW_MULTILINE_SECRET'];
   const isMultilineAlreadyAllowed = envKeys.some(key => `${process.env[key]}`.toUpperCase() === 'TRUE');
-  const shouldTemporarilyAllowMultiline = includesNewline && !isMultilineAlreadyAllowed;
+  const shouldTemporarilyAllowMultiline = includesNewline && !shouldEncodeForPlatformCompatibility && !isMultilineAlreadyAllowed;
   const previousEnvValues = Object.fromEntries(
     envKeys.map(key => [
       key,
@@ -24,7 +27,11 @@ function setSecretOutputVariable(variableName, variableValue, isOutput = true) {
       }
     }
 
-    SDK.setVariable(variableName, value, true, isOutput);
+    SDK.setVariable(variableName, outputValue, true, isOutput);
+
+    if (shouldEncodeForPlatformCompatibility) {
+      SDK.setVariable(`${variableName}_ENCODING`, 'base64', false, isOutput);
+    }
   } finally {
     if (shouldTemporarilyAllowMultiline) {
       for (const key of envKeys) {
@@ -37,6 +44,10 @@ function setSecretOutputVariable(variableName, variableValue, isOutput = true) {
       }
     }
   }
+
+  return {
+    wasEncoded: shouldEncodeForPlatformCompatibility
+  };
 }
 
 function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
@@ -49,8 +60,11 @@ function processStaticSecretResponse(staticSecretsDictionary, secretResult) {
       continue;
     }
 
-    setSecretOutputVariable(outputName, secret, true);
-    console.log(`✅ '${akeylessPath}' => output: ${outputName} (secret value redacted)`);
+    const {wasEncoded} = setSecretOutputVariable(outputName, secret, true);
+    const messageSuffix = wasEncoded
+      ? ` (multiline secret stored as base64; see ${outputName}_ENCODING)`
+      : ' (secret value redacted)';
+    console.log(`✅ '${akeylessPath}' => output: ${outputName}${messageSuffix}`);
   }
 }
 
@@ -110,9 +124,12 @@ function processDynamicSecretResponse(akeylessPath, outputPrefix, secretResult, 
 function setAutoGenOutput(prefix, propName, value, extraLogMessage) {
   // Use the developer's output name as the top prefix, this avoids overwrites if multiple secrets have the same keys.
   const variableName = `${prefix}_${propName}`;
-  setSecretOutputVariable(variableName, value);
+  const {wasEncoded} = setSecretOutputVariable(variableName, value);
   const details = extraLogMessage ? ` ${extraLogMessage}` : '';
-  console.log(`✅ Output: ${variableName} (secret value redacted).${details}`);
+  const messageSuffix = wasEncoded
+    ? ` (multiline secret stored as base64; see ${variableName}_ENCODING).`
+    : ' (secret value redacted).';
+  console.log(`✅ Output: ${variableName}${messageSuffix}${details}`);
 }
 
 function generalFail(message) {

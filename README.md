@@ -52,7 +52,7 @@ If this is your first time using the extension, please visit the documentation t
 > [!IMPORTANT]
 > - When defining the secrets, you need to make sure the input's format is correct. For example, a single secret would be `{"/path/to/secret":"my_secret" }` or for multiple secrets `{"/path/to/first-secret":"first_secret", "/path/to/second-secret":"second_secret" }`.
 > - To avoid PowerShell JSON parsing errors for dynamic secrets, use an env to pass the task's outputs. See the [Processing Plain Output](#processing-plain-output) examples.
-> - Multiline secret values are supported for output variables (for example RSA/PEM private keys fetched via `staticSecrets`). When consuming multiline values in scripts, pass them through `env` and preserve line breaks.
+> - Multiline secret values are handled differently by agent OS. On Windows agents, the requested output keeps the original multiline value. On Linux and macOS agents, Azure DevOps rejects multiline secret variables, so the task stores the requested output as a base64-encoded secret and also emits `<outputName>_ENCODING=base64`. Decode before use.
 
 ## Outputs
 
@@ -112,7 +112,7 @@ You will have `$(MyAkeylessTask.firstSecret)` and  `$(MyAkeylessTask.secondSecre
 
 #### Multiline Example
 
-Using a multiline static secret like an RSA/PEM private key can be used to directly write to a file
+Using a multiline static secret like an RSA/PEM private key can still be written to a file. On Linux/macOS agents, decode the base64-encoded secret first.
 
 ```yaml
 - task: akeyless-secrets@1
@@ -124,15 +124,19 @@ Using a multiline static secret like an RSA/PEM private key can be used to direc
     staticSecrets: '{"/WebComponents/prod/github-automation/APP_PRIVATE_KEY":"appPrivateKey"}'
 
 - bash: |
-    # Write the multiline key exactly as received.
-    cat > app-private-key.pem <<'EOF'
-    $APP_PRIVATE_KEY
-    EOF
+    if [ "$APP_PRIVATE_KEY_ENCODING" = "base64" ]; then
+      printf '%s' "$APP_PRIVATE_KEY" | base64 -d > app-private-key.pem
+    else
+      cat > app-private-key.pem <<'EOF'
+      $APP_PRIVATE_KEY
+      EOF
+    fi
     chmod 600 app-private-key.pem
     wc -l app-private-key.pem
   displayName: 'Use multiline RSA key'
   env:
     APP_PRIVATE_KEY: $(MyAkeylessTask.appPrivateKey)
+    APP_PRIVATE_KEY_ENCODING: $(MyAkeylessTask.appPrivateKey_ENCODING)
 ```
 
 ## Dynamic Secrets

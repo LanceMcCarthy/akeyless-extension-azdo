@@ -40,8 +40,15 @@ jobs:
     # Verify static secret outputs
     - powershell: |
         Write-Host "Output 1 (nuget_key): $(AkeylessStatic.EXAMPLE_STATIC_STRING)"
-        Write-Host "Output 2 (multiline-example): $(AkeylessStatic.EXAMPLE_MULTILINE_RSA_KEY)"
       displayName: '[Static] Check static secret outputs'
+
+    - powershell: |
+        $multilineValue = '$(AkeylessStatic.EXAMPLE_MULTILINE_RSA_KEY)'
+        if ('$(AkeylessStatic.EXAMPLE_MULTILINE_RSA_KEY_ENCODING)' -eq 'base64') {
+          $multilineValue = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($multilineValue))
+        }
+        Write-Host "Output 2 (multiline-example) length: $($multilineValue.Length)"
+      displayName: '[Static] Check multiline static secret outputs'
 
     # Get dynamic secrets
     - task: akeyless-secrets@1
@@ -144,8 +151,15 @@ jobs:
     # Verify static secret outputs
     - bash: |
         echo "Output 1 (nuget_key): $(AkeylessStatic.EXAMPLE_STATIC_STRING)"
-        echo "Output 2 (multiline-example): $(AkeylessStatic.EXAMPLE_MULTILINE_RSA_KEY)"
       displayName: '[Static] Check static secret outputs'
+
+    - bash: |
+        multiline_value='$(AkeylessStatic.EXAMPLE_MULTILINE_RSA_KEY)'
+        if [ '$(AkeylessStatic.EXAMPLE_MULTILINE_RSA_KEY_ENCODING)' = 'base64' ]; then
+          multiline_value="$(printf '%s' "$multiline_value" | base64 -d)"
+        fi
+        printf 'Output 2 (multiline-example) length: %s\n' "${#multiline_value}"
+      displayName: '[Static] Check multiline static secret outputs'
 
     # Get dynamic secrets
     - task: akeyless-secrets@1
