@@ -118,11 +118,11 @@ The task automatically handles secret values that contain newlines (e.g. RSA/PEM
 | Agent OS | Behavior |
 |----------|----------|
 | **Windows** | The original multiline value is preserved as-is. |
-| **Linux / macOS** | Azure DevOps rejects multiline secret variables, so the value is stored as a **base64-encoded** secret. An additional companion variable `<outputName>_ENCODING=base64` is emitted so you know to decode it. |
+| **Linux / macOS** | Azure DevOps rejects multiline secret variables, so the value is stored as a **base64-encoded** secret. An additional companion variable `<outputName>_ENCODING=base64` is emitted when this occurs, so you know to decode it. |
 
 This applies to both `staticSecrets` and `dynamicSecrets` — no extra configuration required.
 
-#### Multiline Example
+#### Example
 
 Using a multiline static secret like an RSA/PEM private key can still be written to a file. On Linux/macOS agents, decode the base64-encoded secret first.
 
@@ -133,22 +133,22 @@ Using a multiline static secret like an RSA/PEM private key can still be written
   inputs:
     accessid: 'p-123456'
     azureJwt: '$(AzureCLI.azure_jwt)'
-    staticSecrets: '{"/WebComponents/prod/github-automation/APP_PRIVATE_KEY":"appPrivateKey"}'
+    staticSecrets: '{"/app-secrets/my-private-key":"MY_RSA_KEY"}'
 
 - bash: |
-    if [ "$APP_PRIVATE_KEY_ENCODING" = "base64" ]; then
-      printf '%s' "$APP_PRIVATE_KEY" | base64 -d > app-private-key.pem
+    if [ '$(AkeylessStatic.MY_RSA_KEY_ENCODING)' = "base64" ]; then
+      printf '🔨+💾 Secret is a base64 string, decoding and saving...'
+      printf '%s' '$(AkeylessStatic.MY_RSA_KEY)' | base64 -d > app-private-key.pem
     else
+      printf '💾 Secret is not encoded, saving...'
       cat > app-private-key.pem <<'EOF'
-      $APP_PRIVATE_KEY
+      '$(AkeylessStatic.MY_RSA_KEY)'
       EOF
     fi
     chmod 600 app-private-key.pem
     wc -l app-private-key.pem
-  displayName: 'Use multiline RSA key'
-  env:
-    APP_PRIVATE_KEY: $(MyAkeylessTask.appPrivateKey)
-    APP_PRIVATE_KEY_ENCODING: $(MyAkeylessTask.appPrivateKey_ENCODING)
+    printf '✅ RSA key is ready'
+  displayName: 'Save multiline RSA key'
 ```
 
 ## Dynamic Secrets
