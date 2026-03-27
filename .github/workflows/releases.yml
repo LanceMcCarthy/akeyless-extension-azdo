@@ -15,9 +15,7 @@ jobs:
     name: Prepare and Package
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v6
 
     - name: "Prepare code & run tests"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
@@ -49,7 +47,7 @@ jobs:
         # -5- Publish to marketplace
         npx tfx extension publish --vsix "$($vsixFile.FullName)" --token ${{secrets.MARKETPLACE_PAT}} --auth-type pat
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       name: "Attach Artifact"
       with:
         name: lancelotsoftware.akeyless-secrets
