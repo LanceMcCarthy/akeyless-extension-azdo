@@ -52,6 +52,7 @@
       "<rootDir>/jest.setup.js"
     ],
     "testEnvironment": "node",
+    "coverageProvider": "v8",
     "silent": false,
     "verbose": false
   }
