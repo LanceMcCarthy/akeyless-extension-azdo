@@ -1,4 +1,4 @@
-name: 'Main - Tests'
+name: 'Main'
 
 on:
   workflow_dispatch:
@@ -18,10 +18,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v6
 
-    - name: "Test"
+    - name: "Build and Run Tests"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
-      run: |
-        npm run restore
-        npm run format
-        npm run lint
-        npm run test:coverage
+      run: npm run precommit
