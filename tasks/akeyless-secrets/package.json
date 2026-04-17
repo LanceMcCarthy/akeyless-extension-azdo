@@ -43,7 +43,8 @@
     "prettier": "^3.8.0"
   },
   "overrides": {
-    "glob": "^13.0.6"
+    "glob": "^13.0.6",
+    "superagent": "^10.3.0"
   },
   "jest": {
     "setupFilesAfterEnv": [
