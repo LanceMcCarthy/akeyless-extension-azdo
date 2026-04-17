@@ -6,7 +6,8 @@ on:
     branches:
       - main
     paths:
-      - 'tasks/akeyless-secrets/src/**/*'
+      - 'tasks/akeyless-secrets/**/*'
+      - '.github/workflows/main.yml'
 
 jobs:
   build-and-test:
