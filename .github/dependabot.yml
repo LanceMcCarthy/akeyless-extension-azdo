@@ -8,6 +8,11 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+      # uuid >= 9 dropped the uuid/v4 sub-path export that azure-pipelines-task-lib@5.x
+      # requires. The override cannot be applied until Microsoft updates task-lib.
+      # Track progress in: https://github.com/LanceMcCarthy/akeyless-extension-azdo/issues/99
+      - dependency-name: "uuid"
+        versions: [">=9.0.0"]
     groups:
        dependencies:
           applies-to: version-updates
