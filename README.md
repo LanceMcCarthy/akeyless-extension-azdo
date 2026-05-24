@@ -14,15 +14,21 @@ Use this Azure DevOps extension to safely retrieve and use secrets from your AKe
     - [Plain Output](#plain-output) ([examples](#simple-output-examples))
   - [Support](#support)
  
->  I am 100% committed to maintaining this and update it monthly, however I should mention that Akeyless now has their own, see [Akeyless AzDO Extension](https://docs.akeyless.io/docs/akeyless-azure-devops-extension).
+> [!NOTE]
+> Akeyless has released [Akeyless AzDO Extension](https://docs.akeyless.io/docs/akeyless-azure-devops-extension). That said, I am still 100% committed to maintaining and updating this extension monthly to keep ahead of security and feature patches.
 
-## Status
+## Build Status
 
 | Workflow | Status |
-|---|---|
+|----------|--------|
 | Main | [![Main - Tests](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml/badge.svg)](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/main.yml) |
 | Publish | [![Publish Release](https://github.com/LanceMcCarthy/akeyless-extension-azdo/actions/workflows/releases.yml/badge.svg)](https://dev.azure.com/lance/DevOps%20Examples/_build?definitionId=82&_a=summary) |
-| Proof Pipeline | [![Build Status](https://dev.azure.com/lance/DevOps%20Examples/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/DevOps%20Examples/_build/latest?definitionId=82&branchName=main) |
+
+### Test Pipelines
+
+| Workflow | Status |
+|----------|--------|
+| Test all Akeyless Secret Types| [![Build Status](https://dev.azure.com/lance/Pipeline%20Tasks/_apis/build/status%2FLanceMcCarthy.akeyless-extension-azdo?branchName=main)](https://dev.azure.com/lance/Pipeline%20Tasks/_build/latest?definitionId=83&branchName=main) |
 
 ## Installation
 
