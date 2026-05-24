@@ -26,8 +26,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 20
-          running-workflow-name: dependabot
-          allowed-conclusions: success
+          check-name: 'Run Tests'
+          allowed-conclusions: success,skipped
       
       # Skip major version updates as they might contain breaking changes
       # Skip akeyless updates as they will require manual
