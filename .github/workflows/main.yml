@@ -19,14 +19,7 @@ jobs:
   build-and-test:
     runs-on: windows-latest
     name: Run Tests
-    # Only run automatically for trusted contributors. External contributors must have a
-    # maintainer manually approve the workflow run via the GitHub Actions UI.
-    # author_association values for trusted actors: OWNER, MEMBER, COLLABORATOR
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.pull_request.author_association == 'OWNER' ||
-      github.event.pull_request.author_association == 'MEMBER' ||
-      github.event.pull_request.author_association == 'COLLABORATOR'
+    if: contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
     env:
         NODE_OPTIONS: "--max_old_space_size=4096"
     steps:
