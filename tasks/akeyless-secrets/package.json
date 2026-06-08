@@ -29,23 +29,23 @@
   "author": "Lance McCarthy",
   "license": "ISC",
   "dependencies": {
-    "akeyless": "^5.0.23",
-    "azure-pipelines-task-lib": "^5.2.1"
+    "akeyless": "5.0.23",
+    "azure-pipelines-task-lib": "5.2.1"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "baseline-browser-mapping": "^2.10.0",
-    "cross-env": "^10.1.0",
-    "eslint": "^10.4.0",
-    "eslint-plugin-prettier": "^5.5.1",
-    "globals": "^17.6.0",
-    "jest": "^30.4.2",
-    "prettier": "^3.8.0"
+    "@eslint/js": "10.0.1",
+    "baseline-browser-mapping": "2.10.0",
+    "cross-env": "10.1.0",
+    "eslint": "10.4.0",
+    "eslint-plugin-prettier": "5.5.1",
+    "globals": "17.6.0",
+    "jest": "30.4.2",
+    "prettier": "3.8.0"
   },
   "overrides": {
-    "glob": "^13.0.6",
-    "superagent": "^10.3.0",
-    "q": "^2.0.3"
+    "glob": "13.0.6",
+    "superagent": "10.3.0",
+    "q": "2.0.3"
   },
   "jest": {
     "setupFilesAfterEnv": [
