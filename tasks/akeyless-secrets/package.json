@@ -7,6 +7,9 @@
     "restore": "npm ci",
     "format": "prettier --write **/*.js",
     "lint": "eslint **/*.js",
+    "audit": "npm audit --omit=dev",
+    "audit:full": "npm audit",
+    "audit:ci": "npm audit --omit=dev --audit-level=high",
     "test": "cross-env NODE_NO_WARNINGS=1 jest",
     "test:verbose": "cross-env NODE_NO_WARNINGS=1 jest --verbose",
     "test:coverage": "cross-env NODE_NO_WARNINGS=1 jest --coverage",
@@ -29,23 +32,17 @@
   "author": "Lance McCarthy",
   "license": "ISC",
   "dependencies": {
-    "akeyless": "5.0.23",
-    "azure-pipelines-task-lib": "5.2.1"
+    "akeyless": "5.0.26",
+    "azure-pipelines-task-lib": "5.2.11"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "baseline-browser-mapping": "2.10.0",
     "cross-env": "10.1.0",
-    "eslint": "10.4.0",
-    "eslint-plugin-prettier": "5.5.1",
+    "eslint": "10.5.0",
+    "eslint-plugin-prettier": "5.5.6",
     "globals": "17.6.0",
     "jest": "30.4.2",
-    "prettier": "3.8.0"
-  },
-  "overrides": {
-    "glob": "13.0.6",
-    "superagent": "10.3.0",
-    "q": "2.0.3"
+    "prettier": "3.8.4"
   },
   "jest": {
     "setupFilesAfterEnv": [

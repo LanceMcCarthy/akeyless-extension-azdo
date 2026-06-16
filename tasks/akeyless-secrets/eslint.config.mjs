@@ -2,12 +2,17 @@ import globals from "globals";
 import pluginJs from "@eslint/js";
 
 export default [
+  {
+    ignores: ["coverage/**", "**/coverage/**"]
+  },
   pluginJs.configs.recommended,
   {
     files: ["**/*.js"], 
     languageOptions: {sourceType: "commonjs"},
     ignores: [
       "node_modules/",
+      "coverage/",
+      "**/coverage/**",
       ".vscode/",
       "package.json",
       "package-lock.json",
