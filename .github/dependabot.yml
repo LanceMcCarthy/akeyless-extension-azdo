@@ -5,6 +5,7 @@ updates:
     directory: "/tasks/akeyless-secrets"
     schedule:
       interval: "monthly"
+    open-pull-requests-limit: 1
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
@@ -14,7 +15,11 @@ updates:
       - dependency-name: "uuid"
         versions: [">=9.0.0"]
     groups:
-       dependencies:
-          applies-to: version-updates
-          patterns:
-            - "*"
+      all-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      all-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
