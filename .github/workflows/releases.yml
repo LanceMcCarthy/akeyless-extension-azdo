@@ -1,13 +1,15 @@
 name: 'Publish Release'
+
 on:
   workflow_dispatch:
-
-env:
-  NODE_OPTIONS: "--max_old_space_size=4096"
 
 permissions:
   packages: write
   contents: write
+
+env:
+  NODE_OPTIONS: "--max_old_space_size=4096"
+  ErrorActionPreference: "Stop"
 
 jobs:
   build-and-package:
@@ -15,39 +17,40 @@ jobs:
     name: Prepare and Package
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: "Prepare code & run tests"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
       run: npm run precommit
 
-    - name: "Package and publish AzDO extension"
+    - name: "1 - Install TFX CLI"
+      run: npm i -g tfx-cli
+
+    - name: "2 - Login to VSX marketplace"
+      run: npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token ${{secrets.MARKETPLACE_PAT}}
+
+    # REMINDER: Do NOT auto-bump the version here, it is already set in the branch being published.
+    - name: "3 - Package the extension"
+      run: npx tfx-cli extension create --manifest-globs ./vss-extension.json
+
+    - name: "4 - Locate VSIX package"
+      id: find-vsix
       run: |
-        $ErrorActionPreference = 'Stop'
-
-        # -1- Install VSX CLI
-        npm i -g tfx-cli
-
-        # -2- Login to VSX marketplace
-        npx tfx login --service-url "https://marketplace.visualstudio.com/" --auth-type pat --token ${{secrets.MARKETPLACE_PAT}}
-
-        # -3- Package the extension
-        # REMINDER: Do NOT auto-bump the version here, it is already set in the branch being published.
-        npx tfx-cli extension create --manifest-globs ./vss-extension.json
-
-        # -4- Find the path to the vsix
         $vsixFile = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "LancelotSoftware.akeyless-extensions-*.vsix" -Recurse -File | Select-Object -First 1
-        
-        if (-not $vsixFile) {
-          throw "VSIX file not found in workspace, cancelling publish."
+
+        if ($vsixFile) {
+          Write-Host "Located VSIX, setting output..."
+          echo "VSIX_FILE_PATH=$($vsixFile.FullName)" >> $GITHUB_OUTPUT
+        }
+        else{
+          throw "VSIX not found"
+          exit 1
         }
 
-        Write-Host "Found VSIX file at: $($vsixFile.FullName)"
+    - name: "5 - Publish extension to VSX AzDO marketplace"
+      run: npx tfx extension publish --vsix "${{steps.find-vsix.outputs.VSIX_FILE_PATH}}" --token ${{secrets.MARKETPLACE_PAT}} --auth-type pat
 
-        # -5- Publish to marketplace
-        npx tfx extension publish --vsix "$($vsixFile.FullName)" --token ${{secrets.MARKETPLACE_PAT}} --auth-type pat
-
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       name: "Attach Artifact"
       with:
         name: lancelotsoftware.akeyless-secrets
