@@ -15,6 +15,10 @@ on:
       - 'tasks/akeyless-secrets/**/*'
       - '.github/workflows/main.yml'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build-and-test:
     runs-on: windows-latest
