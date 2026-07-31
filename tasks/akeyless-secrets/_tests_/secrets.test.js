@@ -1,7 +1,3 @@
-jest.mock('azure-pipelines-task-lib/task');
-jest.mock('akeyless');
-jest.mock('../src/helpers');
-
 const SDK = require('azure-pipelines-task-lib/task');
 const akeyless = require('akeyless');
 const helpers = require('../src/helpers');
@@ -11,17 +7,17 @@ describe('secrets.js', () => {
   let mockApi;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    console.log = jest.fn(); // Mock console.log
+    vi.clearAllMocks();
+    console.log = vi.fn(); // Mock console.log
 
     // Setup default mock API
     mockApi = {
-      getSecretValue: jest.fn(),
-      getDynamicSecretValue: jest.fn()
+      getSecretValue: vi.fn(),
+      getDynamicSecretValue: vi.fn()
     };
 
     // Setup default SDK mocks
-    SDK.setResult = jest.fn();
+    SDK.setResult = vi.fn();
     SDK.TaskResult = {
       Failed: 'Failed'
     };
@@ -44,9 +40,9 @@ describe('secrets.js', () => {
         timeout: timeout
       };
 
-      akeyless.GetSecretValue.constructFromObject = jest.fn().mockReturnValue(mockStaticOpts);
+      akeyless.GetSecretValue.constructFromObject = vi.fn().mockReturnValue(mockStaticOpts);
       mockApi.getSecretValue.mockResolvedValue(mockSecretResult);
-      helpers.processStaticSecretResponse = jest.fn();
+      helpers.processStaticSecretResponse = vi.fn();
 
       // Act
       await secrets.getStatic(mockApi, staticSecrets, akeylessToken, timeout);
@@ -70,7 +66,7 @@ describe('secrets.js', () => {
       const invalidJsonSecrets = 'invalid-json';
       const akeylessToken = 'test-token';
       const timeout = 30;
-      helpers.generalFail = jest.fn();
+      helpers.generalFail = vi.fn();
 
       // Act
       await secrets.getStatic(mockApi, invalidJsonSecrets, akeylessToken, timeout);
@@ -86,7 +82,7 @@ describe('secrets.js', () => {
       const timeout = 30;
       const apiError = new Error('API Error');
 
-      akeyless.GetSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      akeyless.GetSecretValue.constructFromObject = vi.fn().mockReturnValue({});
       mockApi.getSecretValue.mockRejectedValue(apiError);
 
       // Act
@@ -105,7 +101,7 @@ describe('secrets.js', () => {
       const timeout = 30;
       const apiError = {statusCode: 403, code: 'FORBIDDEN'};
 
-      akeyless.GetSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      akeyless.GetSecretValue.constructFromObject = vi.fn().mockReturnValue({});
       mockApi.getSecretValue.mockRejectedValue(apiError);
 
       // Act
@@ -123,9 +119,9 @@ describe('secrets.js', () => {
       const timeout = 30;
       const leakedSecret = `-----BEGIN RSA PRIVATE KEY-----\nabc123\n-----END RSA PRIVATE KEY-----`;
 
-      akeyless.GetSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      akeyless.GetSecretValue.constructFromObject = vi.fn().mockReturnValue({});
       mockApi.getSecretValue.mockResolvedValue({path1: leakedSecret});
-      helpers.processStaticSecretResponse = jest.fn(() => {
+      helpers.processStaticSecretResponse = vi.fn(() => {
         throw new Error(`Unable to set variable with value: ${leakedSecret}`);
       });
 
@@ -142,9 +138,9 @@ describe('secrets.js', () => {
 
     test('should fail when parsed static secrets are undefined', async () => {
       // Arrange
-      helpers.generalFail = jest.fn();
-      akeyless.GetSecretValue.constructFromObject = jest.fn();
-      const parseSpy = jest.spyOn(JSON, 'parse').mockReturnValue(undefined);
+      helpers.generalFail = vi.fn();
+      akeyless.GetSecretValue.constructFromObject = vi.fn();
+      const parseSpy = vi.spyOn(JSON, 'parse').mockReturnValue(undefined);
 
       // Act
       await secrets.getStatic(mockApi, '{"path1": "output1"}', 'test-token', 30);
@@ -176,9 +172,9 @@ describe('secrets.js', () => {
         json: true
       };
 
-      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn().mockReturnValue(mockDynamicOpts);
+      akeyless.GetDynamicSecretValue.constructFromObject = vi.fn().mockReturnValue(mockDynamicOpts);
       mockApi.getDynamicSecretValue.mockResolvedValue(mockDynamicResult);
-      helpers.processDynamicSecretResponse = jest.fn();
+      helpers.processDynamicSecretResponse = vi.fn();
 
       // Act
       await secrets.getDynamic(mockApi, dynamicSecrets, akeylessToken, timeout, autogenerate);
@@ -209,11 +205,11 @@ describe('secrets.js', () => {
       const mockResult1 = {key1: 'value1'};
       const mockResult2 = {key2: 'value2'};
 
-      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn().mockReturnValueOnce({token: akeylessToken, name: 'dynamic-path1', timeout, json: true}).mockReturnValueOnce({token: akeylessToken, name: 'dynamic-path2', timeout, json: true});
+      akeyless.GetDynamicSecretValue.constructFromObject = vi.fn().mockReturnValueOnce({token: akeylessToken, name: 'dynamic-path1', timeout, json: true}).mockReturnValueOnce({token: akeylessToken, name: 'dynamic-path2', timeout, json: true});
 
       mockApi.getDynamicSecretValue.mockResolvedValueOnce(mockResult1).mockResolvedValueOnce(mockResult2);
 
-      helpers.processDynamicSecretResponse = jest.fn();
+      helpers.processDynamicSecretResponse = vi.fn();
 
       // Act
       await secrets.getDynamic(mockApi, dynamicSecrets, akeylessToken, timeout, autogenerate);
@@ -235,7 +231,7 @@ describe('secrets.js', () => {
       const akeylessToken = 'test-token';
       const timeout = 30;
       const autogenerate = 'true';
-      helpers.generalFail = jest.fn();
+      helpers.generalFail = vi.fn();
 
       // Act
       await secrets.getDynamic(mockApi, invalidJsonSecrets, akeylessToken, timeout, autogenerate);
@@ -252,7 +248,7 @@ describe('secrets.js', () => {
       const autogenerate = 'false';
       const apiError = new Error('Dynamic API Error');
 
-      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      akeyless.GetDynamicSecretValue.constructFromObject = vi.fn().mockReturnValue({});
       mockApi.getDynamicSecretValue.mockRejectedValue(apiError);
 
       // Act
@@ -279,7 +275,7 @@ describe('secrets.js', () => {
         }
       };
 
-      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn().mockReturnValue({});
+      akeyless.GetDynamicSecretValue.constructFromObject = vi.fn().mockReturnValue({});
       mockApi.getDynamicSecretValue.mockRejectedValue(apiError);
 
       // Act
@@ -307,9 +303,9 @@ describe('secrets.js', () => {
 
     test('should fail when parsed dynamic secrets are undefined', async () => {
       // Arrange
-      helpers.generalFail = jest.fn();
-      akeyless.GetDynamicSecretValue.constructFromObject = jest.fn();
-      const parseSpy = jest.spyOn(JSON, 'parse').mockReturnValue(undefined);
+      helpers.generalFail = vi.fn();
+      akeyless.GetDynamicSecretValue.constructFromObject = vi.fn();
+      const parseSpy = vi.spyOn(JSON, 'parse').mockReturnValue(undefined);
 
       // Act
       await secrets.getDynamic(mockApi, '{"dynamic-path1": "output1"}', 'test-token', 30, 'false');

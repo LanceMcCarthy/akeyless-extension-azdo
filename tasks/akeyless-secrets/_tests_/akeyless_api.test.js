@@ -1,11 +1,8 @@
-jest.mock('akeyless');
-
-const akeyless = require('akeyless');
 const akeylessApi = require('../src/akeyless_api');
 
 describe('akeyless_api.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('api', () => {
@@ -16,18 +13,24 @@ describe('akeyless_api.js', () => {
       };
       const mockV2Api = {};
 
-      akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
-      akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
+      const mockSdk = {
+        ApiClient: vi.fn().mockImplementation(function () {
+          return mockApiClient;
+        }),
+        V2Api: vi.fn().mockImplementation(function () {
+          return mockV2Api;
+        })
+      };
 
       const testUrl = 'https://api.akeyless.io';
 
       // Act
-      const result = akeylessApi.api(testUrl);
+      const result = akeylessApi.api(testUrl, mockSdk);
 
       // Assert
-      expect(akeyless.ApiClient).toHaveBeenCalledWith();
+      expect(mockSdk.ApiClient).toHaveBeenCalledWith();
       expect(mockApiClient.basePath).toBe(testUrl);
-      expect(akeyless.V2Api).toHaveBeenCalledWith(mockApiClient);
+      expect(mockSdk.V2Api).toHaveBeenCalledWith(mockApiClient);
       expect(result).toBe(mockV2Api);
     });
 
@@ -38,18 +41,24 @@ describe('akeyless_api.js', () => {
       };
       const mockV2Api = {};
 
-      akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
-      akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
+      const mockSdk = {
+        ApiClient: vi.fn().mockImplementation(function () {
+          return mockApiClient;
+        }),
+        V2Api: vi.fn().mockImplementation(function () {
+          return mockV2Api;
+        })
+      };
 
       const customUrl = 'https://custom.akeyless.example.com';
 
       // Act
-      const result = akeylessApi.api(customUrl);
+      const result = akeylessApi.api(customUrl, mockSdk);
 
       // Assert
-      expect(akeyless.ApiClient).toHaveBeenCalledWith();
+      expect(mockSdk.ApiClient).toHaveBeenCalledWith();
       expect(mockApiClient.basePath).toBe(customUrl);
-      expect(akeyless.V2Api).toHaveBeenCalledWith(mockApiClient);
+      expect(mockSdk.V2Api).toHaveBeenCalledWith(mockApiClient);
       expect(result).toBe(mockV2Api);
     });
 
@@ -60,16 +69,22 @@ describe('akeyless_api.js', () => {
       };
       const mockV2Api = {};
 
-      akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
-      akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
+      const mockSdk = {
+        ApiClient: vi.fn().mockImplementation(function () {
+          return mockApiClient;
+        }),
+        V2Api: vi.fn().mockImplementation(function () {
+          return mockV2Api;
+        })
+      };
 
       // Act
-      const result = akeylessApi.api(undefined);
+      const result = akeylessApi.api(undefined, mockSdk);
 
       // Assert
-      expect(akeyless.ApiClient).toHaveBeenCalledWith();
+      expect(mockSdk.ApiClient).toHaveBeenCalledWith();
       expect(mockApiClient.basePath).toBeUndefined();
-      expect(akeyless.V2Api).toHaveBeenCalledWith(mockApiClient);
+      expect(mockSdk.V2Api).toHaveBeenCalledWith(mockApiClient);
       expect(result).toBe(mockV2Api);
     });
 
@@ -80,16 +95,22 @@ describe('akeyless_api.js', () => {
       };
       const mockV2Api = {};
 
-      akeyless.ApiClient = jest.fn().mockImplementation(() => mockApiClient);
-      akeyless.V2Api = jest.fn().mockImplementation(() => mockV2Api);
+      const mockSdk = {
+        ApiClient: vi.fn().mockImplementation(function () {
+          return mockApiClient;
+        }),
+        V2Api: vi.fn().mockImplementation(function () {
+          return mockV2Api;
+        })
+      };
 
       // Act
-      const result = akeylessApi.api('');
+      const result = akeylessApi.api('', mockSdk);
 
       // Assert
-      expect(akeyless.ApiClient).toHaveBeenCalledWith();
+      expect(mockSdk.ApiClient).toHaveBeenCalledWith();
       expect(mockApiClient.basePath).toBe('');
-      expect(akeyless.V2Api).toHaveBeenCalledWith(mockApiClient);
+      expect(mockSdk.V2Api).toHaveBeenCalledWith(mockApiClient);
       expect(result).toBe(mockV2Api);
     });
   });

@@ -1,10 +1,3 @@
-jest.mock('azure-pipelines-task-lib/task');
-jest.mock('../src/helpers');
-jest.mock('../src/auth');
-jest.mock('../src/secrets');
-jest.mock('../src/input');
-jest.mock('../src/akeyless_api');
-
 const SDK = require('azure-pipelines-task-lib/task');
 const helpers = require('../src/helpers');
 const auth = require('../src/auth');
@@ -17,25 +10,25 @@ describe('index.js', () => {
   let mockApi;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    console.log = jest.fn(); // Mock console.log
+    vi.clearAllMocks();
+    console.log = vi.fn(); // Mock console.log
 
     mockApi = {
-      auth: jest.fn(),
-      getSecretValue: jest.fn(),
-      getDynamicSecretValue: jest.fn()
+      auth: vi.fn(),
+      getSecretValue: vi.fn(),
+      getDynamicSecretValue: vi.fn()
     };
 
     // Setup default mocks
-    akeylessApi.api = jest.fn().mockReturnValue(mockApi);
-    auth.getAkeylessToken = jest.fn().mockResolvedValue('test-token');
-    secrets.getStatic = jest.fn().mockResolvedValue();
-    secrets.getDynamic = jest.fn().mockResolvedValue();
-    helpers.generalFail = jest.fn();
+    akeylessApi.api = vi.fn().mockReturnValue(mockApi);
+    auth.getAkeylessToken = vi.fn().mockResolvedValue('test-token');
+    secrets.getStatic = vi.fn().mockResolvedValue();
+    secrets.getDynamic = vi.fn().mockResolvedValue();
+    helpers.generalFail = vi.fn();
 
-    SDK.debug = jest.fn();
-    SDK.error = jest.fn();
-    SDK.setResult = jest.fn();
+    SDK.debug = vi.fn();
+    SDK.error = vi.fn();
+    SDK.setResult = vi.fn();
     SDK.TaskResult = {
       Failed: 'Failed'
     };
@@ -54,7 +47,7 @@ describe('index.js', () => {
         autogenerate: 'true'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
 
       // Act
       await index.run();
@@ -80,7 +73,7 @@ describe('index.js', () => {
         autogenerate: 'false'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
 
       // Act
       await index.run();
@@ -103,7 +96,7 @@ describe('index.js', () => {
         autogenerate: 'true'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
 
       // Act
       await index.run();
@@ -126,7 +119,7 @@ describe('index.js', () => {
         autogenerate: 'false'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
 
       // Act
       await index.run();
@@ -151,8 +144,8 @@ describe('index.js', () => {
         autogenerate: 'true'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
-      auth.getAkeylessToken = jest.fn().mockResolvedValue(undefined); // Auth returns undefined
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
+      auth.getAkeylessToken = vi.fn().mockResolvedValue(undefined); // Auth returns undefined
 
       // Act
       await index.run();
@@ -176,7 +169,7 @@ describe('index.js', () => {
         autogenerate: 'false'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
 
       // Act
       await index.run();
@@ -200,7 +193,7 @@ describe('index.js', () => {
         autogenerate: 'false'
       };
 
-      input.readInputs = jest.fn().mockReturnValue(mockInputs);
+      input.readInputs = vi.fn().mockReturnValue(mockInputs);
 
       // Act
       await index.run();
@@ -212,7 +205,7 @@ describe('index.js', () => {
 
   describe('executeAsMain', () => {
     test('should call run and log debug information', () => {
-      const runSpy = jest.spyOn(index, 'run').mockResolvedValue();
+      const runSpy = vi.spyOn(index, 'run').mockResolvedValue();
 
       index.executeAsMain();
 
@@ -224,7 +217,7 @@ describe('index.js', () => {
 
     test('should handle errors thrown during run execution', () => {
       const error = new Error('boom');
-      const runSpy = jest.spyOn(index, 'run').mockImplementation(() => {
+      const runSpy = vi.spyOn(index, 'run').mockImplementation(() => {
         throw error;
       });
 
@@ -241,7 +234,7 @@ describe('index.js', () => {
   describe('autoExecuteWhenMain', () => {
     test('should execute when module matches require.main', () => {
       const fakeModule = {};
-      const executeSpy = jest.spyOn(index, 'executeAsMain').mockReturnValue();
+      const executeSpy = vi.spyOn(index, 'executeAsMain').mockReturnValue();
 
       index.autoExecuteWhenMain(fakeModule, fakeModule);
 
@@ -253,7 +246,7 @@ describe('index.js', () => {
     test('should not execute when module differs from require.main', () => {
       const fakeModule = {};
       const anotherModule = {};
-      const executeSpy = jest.spyOn(index, 'executeAsMain').mockReturnValue();
+      const executeSpy = vi.spyOn(index, 'executeAsMain').mockReturnValue();
 
       index.autoExecuteWhenMain(fakeModule, anotherModule);
 

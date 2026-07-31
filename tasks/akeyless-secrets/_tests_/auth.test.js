@@ -1,27 +1,24 @@
-jest.mock('akeyless');
-jest.mock('../src/helpers');
-
 const akeyless = require('akeyless');
 const helpers = require('../src/helpers');
 const auth = require('../src/auth');
 
 describe('auth.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    console.log = jest.fn(); // Mock console.log
+    vi.clearAllMocks();
+    console.log = vi.fn(); // Mock console.log
   });
 
   describe('getAkeylessToken', () => {
     test('should successfully authenticate and return token', async () => {
       // Arrange
       const mockApi = {
-        auth: jest.fn().mockResolvedValue({token: 'test-akeyless-token'})
+        auth: vi.fn().mockResolvedValue({token: 'test-akeyless-token'})
       };
       const accessId = 'p-12345';
       const azureJwt = 'test-jwt-token';
       const authBody = {'access-type': 'jwt', 'access-id': accessId, jwt: azureJwt};
 
-      akeyless.Auth.constructFromObject = jest.fn().mockReturnValue(authBody);
+      akeyless.Auth.constructFromObject = vi.fn().mockReturnValue(authBody);
 
       // Act
       const result = await auth.getAkeylessToken(mockApi, accessId, azureJwt);
@@ -40,9 +37,9 @@ describe('auth.js', () => {
 
     test('should fail when accessId is undefined', async () => {
       // Arrange
-      const mockApi = {auth: jest.fn()};
+      const mockApi = {auth: vi.fn()};
       const azureJwt = 'test-jwt-token';
-      helpers.generalFail = jest.fn();
+      helpers.generalFail = vi.fn();
 
       // Act
       await auth.getAkeylessToken(mockApi, undefined, azureJwt);
@@ -53,9 +50,9 @@ describe('auth.js', () => {
 
     test('should fail when azureJwt is undefined', async () => {
       // Arrange
-      const mockApi = {auth: jest.fn()};
+      const mockApi = {auth: vi.fn()};
       const accessId = 'p-12345';
-      helpers.generalFail = jest.fn();
+      helpers.generalFail = vi.fn();
 
       // Act
       await auth.getAkeylessToken(mockApi, accessId, undefined);
@@ -67,14 +64,14 @@ describe('auth.js', () => {
     test('should handle authentication API error', async () => {
       // Arrange
       const mockApi = {
-        auth: jest.fn().mockRejectedValue(new Error('Auth failed'))
+        auth: vi.fn().mockRejectedValue(new Error('Auth failed'))
       };
       const accessId = 'p-12345';
       const azureJwt = 'test-jwt-token';
       const authBody = {'access-type': 'jwt', 'access-id': accessId, jwt: azureJwt};
 
-      akeyless.Auth.constructFromObject = jest.fn().mockReturnValue(authBody);
-      helpers.generalFail = jest.fn();
+      akeyless.Auth.constructFromObject = vi.fn().mockReturnValue(authBody);
+      helpers.generalFail = vi.fn();
 
       // Act
       await auth.getAkeylessToken(mockApi, accessId, azureJwt);
@@ -86,14 +83,14 @@ describe('auth.js', () => {
     test('should handle empty token response', async () => {
       // Arrange
       const mockApi = {
-        auth: jest.fn().mockResolvedValue({}) // No token in response
+        auth: vi.fn().mockResolvedValue({}) // No token in response
       };
       const accessId = 'p-12345';
       const azureJwt = 'test-jwt-token';
       const authBody = {'access-type': 'jwt', 'access-id': accessId, jwt: azureJwt};
 
-      akeyless.Auth.constructFromObject = jest.fn().mockReturnValue(authBody);
-      helpers.generalFail = jest.fn();
+      akeyless.Auth.constructFromObject = vi.fn().mockReturnValue(authBody);
+      helpers.generalFail = vi.fn();
 
       // Act
       await auth.getAkeylessToken(mockApi, accessId, azureJwt);
