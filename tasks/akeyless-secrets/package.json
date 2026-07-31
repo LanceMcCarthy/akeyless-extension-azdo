@@ -10,9 +10,9 @@
     "audit": "npm audit --omit=dev",
     "audit:full": "npm audit",
     "audit:ci": "npm audit --omit=dev --audit-level=high",
-    "test": "cross-env NODE_NO_WARNINGS=1 jest",
-    "test:verbose": "cross-env NODE_NO_WARNINGS=1 jest --verbose",
-    "test:coverage": "cross-env NODE_NO_WARNINGS=1 jest --coverage",
+    "test": "cross-env NODE_NO_WARNINGS=1 jest --config jest.config.cjs",
+    "test:verbose": "cross-env NODE_NO_WARNINGS=1 jest --config jest.config.cjs --verbose",
+    "test:coverage": "cross-env NODE_NO_WARNINGS=1 jest --config jest.config.cjs --coverage",
     "precommit": "npm run restore && npm run format && npm run lint && npm run test:coverage",
     "precommit:no-test": "npm run restore && npm run format && npm run lint",
     "bump-task-version": "node -e \"const fs=require('fs');const taskJsonPath='./task.json';const j=JSON.parse(fs.readFileSync(taskJsonPath));let v=j.version;v.Patch++;if(v.Patch>99){v.Patch=0;v.Minor++;}if(v.Minor>99){v.Minor=0;v.Major++;}j.version=v;fs.writeFileSync(taskJsonPath,JSON.stringify(j,null,2));\"",
@@ -43,14 +43,5 @@
     "globals": "17.7.0",
     "jest": "30.4.2",
     "prettier": "3.9.4"
-  },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "testEnvironment": "node",
-    "coverageProvider": "v8",
-    "silent": false,
-    "verbose": false
   }
 }

@@ -1,30 +1,41 @@
-// Suppress Azure DevOps task library warnings in test environment
+// Suppress known Azure DevOps task-lib warning noise in test runs while preserving other warnings.
+const suppressedFragments = ['--localstorage-file', 'Warning: `--localstorage-file` was provided without a valid path', '##vso[task.debug]'];
 
-// Suppress console warnings
-const originalConsoleWarn = console.warn;
-console.warn = (...args) => {
-  const message = args.join(' ');
+let originalConsoleWarn;
+let originalEmitWarning;
 
-  // Suppress specific Azure DevOps task library warnings
-  if (message.includes('--localstorage-file') || message.includes('Warning: `--localstorage-file` was provided without a valid path') || message.includes('##vso[task.debug]')) {
-    return;
+function shouldSuppressText(value) {
+  return typeof value === 'string' && suppressedFragments.some(fragment => value.includes(fragment));
+}
+
+beforeAll(() => {
+  originalConsoleWarn = console.warn;
+  originalEmitWarning = process.emitWarning;
+
+  console.warn = (...args) => {
+    const message = args.join(' ');
+    if (shouldSuppressText(message)) {
+      return;
+    }
+    originalConsoleWarn(...args);
+  };
+
+  process.emitWarning = (warning, ...args) => {
+    if (shouldSuppressText(warning) || shouldSuppressText(warning?.message)) {
+      return;
+    }
+    originalEmitWarning.call(process, warning, ...args);
+  };
+
+  process.env.NODE_NO_WARNINGS = '1';
+});
+
+afterAll(() => {
+  if (originalConsoleWarn) {
+    console.warn = originalConsoleWarn;
   }
 
-  // Allow other warnings through
-  originalConsoleWarn(...args);
-};
-
-// Suppress process warnings for localstorage-file
-const originalEmitWarning = process.emitWarning;
-process.emitWarning = (warning, ...args) => {
-  if (typeof warning === 'string' && warning.includes('--localstorage-file')) {
-    return;
+  if (originalEmitWarning) {
+    process.emitWarning = originalEmitWarning;
   }
-  if (typeof warning === 'object' && warning.message && warning.message.includes('--localstorage-file')) {
-    return;
-  }
-  originalEmitWarning.call(process, warning, ...args);
-};
-
-// Set NODE_NO_WARNINGS environment variable to suppress Node warnings during tests
-process.env.NODE_NO_WARNINGS = '1';
+});
