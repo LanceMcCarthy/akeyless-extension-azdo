@@ -19,16 +19,17 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+    NODE_OPTIONS: "--max_old_space_size=4096"
+
 jobs:
   build-and-test:
     runs-on: windows-latest
     name: Run Tests
     if: github.event_name == 'push' || contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
-    env:
-        NODE_OPTIONS: "--max_old_space_size=4096"
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: "Build and Run Tests"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'

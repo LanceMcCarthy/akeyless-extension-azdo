@@ -1,13 +1,10 @@
 name: 'Publish Release'
+
 on:
   workflow_dispatch:
 
 env:
   NODE_OPTIONS: "--max_old_space_size=4096"
-
-permissions:
-  packages: write
-  contents: write
 
 jobs:
   build-and-package:
@@ -15,7 +12,7 @@ jobs:
     name: Prepare and Package
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: "Prepare code & run tests"
       working-directory: '${{github.workspace}}\tasks\akeyless-secrets'
@@ -37,17 +34,15 @@ jobs:
 
         # -4- Find the path to the vsix
         $vsixFile = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "LancelotSoftware.akeyless-extensions-*.vsix" -Recurse -File | Select-Object -First 1
-        
         if (-not $vsixFile) {
           throw "VSIX file not found in workspace, cancelling publish."
         }
-
         Write-Host "Found VSIX file at: $($vsixFile.FullName)"
-
+        
         # -5- Publish to marketplace
         npx tfx extension publish --vsix "$($vsixFile.FullName)" --token ${{secrets.MARKETPLACE_PAT}} --auth-type pat
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       name: "Attach Artifact"
       with:
         name: lancelotsoftware.akeyless-secrets
