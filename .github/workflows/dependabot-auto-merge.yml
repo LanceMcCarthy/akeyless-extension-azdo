@@ -11,20 +11,20 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    if: ${{github.actor == 'dependabot[bot]'}}
     steps:
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v3.0.0
+        uses: dependabot/fetch-metadata@v3.1.0
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          github-token: ${{secrets.GITHUB_TOKEN}}
       
       - name: Wait for status checks
         id: wait-for-status
-        uses: lewagon/wait-on-check-action@v1.5.0
+        uses: lewagon/wait-on-check-action@v1.9.0
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{github.event.pull_request.head.sha}}
+          repo-token: ${{secrets.GITHUB_TOKEN}}
           wait-interval: 20
           check-name: 'Run Tests'
           allowed-conclusions: success,skipped
@@ -32,10 +32,10 @@ jobs:
       # Skip major version updates as they might contain breaking changes
       # Skip akeyless updates as they will require manual
       - name: Auto-merge non-major updates
-        if: ${{ steps.metadata.outputs.update-type != 'version-update:semver-major' && !contains(steps.metadata.outputs.dependency-names, 'akeyless') }}
+        if: ${{steps.metadata.outputs.update-type != 'version-update:semver-major' && !contains(steps.metadata.outputs.dependency-names, 'akeyless')}}
         run: |
           gh pr review --approve "$PR_URL"
-          gh pr merge --squash "$PR_URL"
+          gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
