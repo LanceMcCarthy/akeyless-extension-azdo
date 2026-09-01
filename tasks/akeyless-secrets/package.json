@@ -33,15 +33,15 @@
   "license": "ISC",
   "dependencies": {
     "akeyless": "5.0.26",
-    "azure-pipelines-task-lib": "5.278.0"
+    "azure-pipelines-task-lib": "5.279.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@vitest/coverage-v8": "4.1.10",
     "cross-env": "10.1.0",
-    "eslint": "10.8.0",
+    "eslint": "10.9.1",
     "eslint-plugin-prettier": "5.5.6",
-    "globals": "17.8.0",
+    "globals": "17.11.0",
     "prettier": "3.9.4",
     "vitest": "4.1.10"
   }
